@@ -1,5 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { DynamoDbConstruct } from './constructs/dynamodb-construct';
+import { LambdaConstruct } from './constructs/lambda-construct';
+import { ApiGatewayCanalConstruct } from './constructs/apigateway-canal-construct';
+import { ApiGatewayTecnicaConstruct } from './constructs/apigateway-tecnica-construct';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class MfeServerlessStack extends cdk.Stack {
@@ -8,9 +12,28 @@ export class MfeServerlessStack extends cdk.Stack {
 
     // The code that defines your stack goes here
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'MfeServerlessQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const dynamoDB = new DynamoDbConstruct(this, 'DynamoDB Tables');
+
+    const lambdas = new LambdaConstruct(this, 'lambdas', {
+      mfesTable: dynamoDB.mfesTable,
+      relacionesTable: dynamoDB.relacionesTable,
+      solicitudesTable: dynamoDB.solicitudesTable,
+    });
+
+    const apiTecnica = new ApiGatewayTecnicaConstruct(this, 'tecnica-api', {
+      catalogoParserLambda: lambdas.catalogoParserLambda,
+      consultasAdminLambda: lambdas.consultasAdminLambda,
+      consultasLambda: lambdas.consultasLambda,
+      userPoolId: 'us-east-1_Yp30UfnkP'
+    })
+
+    const apiCanal = new ApiGatewayCanalConstruct(this, 'canal-api', {
+      apiTecnicaUrl: `${apiTecnica.api.url}`,
+      userPoolId: 'us-east-1_Yp30UfnkP'
+    });
+
+    new cdk.CfnOutput(this, "ApiCanalUrl", { value: apiCanal.api.url });
+    new cdk.CfnOutput(this, "ApiTecnicalUrl", { value: apiTecnica.api.url });
+
   }
 }

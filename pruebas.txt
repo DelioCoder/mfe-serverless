@@ -1,0 +1,57 @@
+Feature: Gestión del Catálogo de Microfrontends (MFEs)
+
+  # --- Usuario ---
+
+  Scenario: Listar todos los MFEs
+    Given que el usuario está autenticado
+    When realiza una solicitud GET a "/"
+    Then el sistema devuelve un listado de MFEs
+    And la respuesta tiene un código 200
+    And el listado contiene al menos un MFE con atributos "id", "nombre", "estado"
+
+  Scenario: Registrar un nuevo MFE
+    Given que el usuario está autenticado
+    And envía un payload válido con los datos del nuevo MFE
+    When realiza una solicitud POST a "/create=pending"
+    Then el sistema guarda el MFE en estado "pending"
+    And la respuesta tiene un código 201
+    And el cuerpo contiene el "id" del nuevo MFE
+
+  Scenario: Actualizar un MFE en estado pendiente
+    Given que el usuario está autenticado
+    And existe un MFE en estado "pending"
+    When realiza una solicitud PUT a "/update=pending" con un payload válido
+    Then el sistema actualiza la información del MFE
+    And la respuesta tiene un código 200
+    And el estado permanece "pending" hasta que un admin lo apruebe
+
+  Scenario: Consultar un MFE por ID
+    Given que el usuario está autenticado
+    And existe un MFE con id "123"
+    When realiza una solicitud GET a "/123"
+    Then el sistema devuelve la información detallada del MFE
+    And la respuesta tiene un código 200
+    And el cuerpo contiene los atributos "id", "nombre", "estado", "fechaRegistro"
+
+  # --- Admin ---
+
+  Scenario: Listar todos los MFEs como administrador
+    Given que el administrador está autenticado
+    When realiza una solicitud GET a "/"
+    Then el sistema devuelve el listado completo de MFEs
+    And la respuesta tiene un código 200
+    And cada MFE contiene "estado" con valores "pending", "approved" o "rejected"
+
+  Scenario: Aprobar un MFE pendiente
+    Given que el administrador está autenticado
+    And existe un MFE en estado "pending"
+    When realiza una solicitud PUT para cambiar el estado a "approved"
+    Then el sistema actualiza el estado del MFE a "approved"
+    And la respuesta tiene un código 200
+
+  Scenario: Rechazar un MFE pendiente
+    Given que el administrador está autenticado
+    And existe un MFE en estado "pending"
+    When realiza una solicitud PUT para cambiar el estado a "rejected"
+    Then el sistema actualiza el estado del MFE a "rejected"
+    And la respuesta tiene un código 200

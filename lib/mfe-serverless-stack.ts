@@ -18,6 +18,7 @@ export class MfeServerlessStack extends cdk.Stack {
       mfesTable: dynamoDB.mfesTable,
       relacionesTable: dynamoDB.relacionesTable,
       solicitudesTable: dynamoDB.solicitudesTable,
+      secuenciaIdTable: dynamoDB.secuenciaIdTable
     });
 
     const apiTecnica = new ApiGatewayTecnicaConstruct(this, 'tecnica-api', {

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { CreateMfeDto } from './dto/create-mfe.dto';
 
 const client = new DynamoDBClient({});
@@ -13,13 +13,13 @@ const mfesTable = process.env.MFES_TABLE!;
 const solicitudesTable = process.env.SOLICITUDES_TABLE!;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  
+
   const { body } = event;
-  
+
   const queryParams = event.queryStringParameters;
 
   const limit = parseInt(queryParams?.limit!) || 5;
-  const page = parseInt(queryParams?.page!) || 1;
+  const cursor = queryParams?.next || void 0;
 
   try {
 
@@ -34,24 +34,31 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           return { statusCode: 200, body: JSON.stringify(resp.Item) };
         }
 
-        const data = await dynamoDB.send(new ScanCommand({ TableName: mfesTable }));
+        const params = {
+          TableName: mfesTable,
+          IndexName: 'CreatedAtIndex',
+          KeyConditionExpression: "pk = :pk",
+          ExpressionAttributeValues: {
+            ":pk": "MFEs"
+          },
+          ScanIndexForward: true,
+          Limit: limit,
+          ExclusiveStartKey: cursor ? JSON.parse(decodeURIComponent(cursor)) : undefined
+        };
 
-        const totalItems = data.Items?.length || 0;
-        const sortedItems = (data.Items || []).sort((a, b) => b.createdAt - a.createdAt);
-        const lastPage = Math.ceil( totalItems / limit );
+        const data = await dynamoDB.send(new QueryCommand(params));
 
-        const start = (page - 1) * limit;
-        const end = start + limit;
-        const paginated = sortedItems.slice(start, end);
+        const nextCursor = data.LastEvaluatedKey
+          ? encodeURIComponent(JSON.stringify(data.LastEvaluatedKey))
+          : null;
 
         return {
           statusCode: 200,
           body: JSON.stringify({
-            data: paginated,
+            data: data.Items,
+            next: data.Items!.length < limit ? null : nextCursor,
             meta: {
-              page,
-              lastPage,
-              total: totalItems,
+              hasMore: nextCursor ? true : false
             }
           })
         };
@@ -62,7 +69,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         if (!body) {
           return { statusCode: 400, body: JSON.stringify({ error: 'Empty body' }) }
         }
-        
+
         const input = JSON.parse(body);
         const dtoBody = plainToInstance(CreateMfeDto, input);
         const errors = await validate(dtoBody, { whitelist: true, forbidNonWhitelisted: true });

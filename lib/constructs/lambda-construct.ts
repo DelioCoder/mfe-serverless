@@ -9,6 +9,7 @@ export interface LambdaConstructProps {
   mfesTable: dynamodb.Table;
   solicitudesTable: dynamodb.Table;
   relacionesTable: dynamodb.Table;
+  secuenciaIdTable: dynamodb.Table;
   auditoriaTable?: dynamodb.Table;
 }
 
@@ -44,7 +45,7 @@ export class LambdaConstruct extends Construct {
       environment: {
         MFES_TABLE: props.mfesTable.tableName,
         SOLICITUDES_TABLE: props.solicitudesTable.tableName,
-        // AUDITORIA_TABLE: props.auditoriaTable.tableName,
+        SECUENCIA_ID_TABLE: props.secuenciaIdTable.tableName,
       },
       bundling: {
         forceDockerBundling: false,
@@ -74,6 +75,7 @@ export class LambdaConstruct extends Construct {
     // props.auditoriaTable.grantReadWriteData(this.consultasAdminLambda);
     props.mfesTable.grantReadWriteData(this.consultasLambda);
     props.mfesTable.grantReadWriteData(this.consultasAdminLambda);
+    props.secuenciaIdTable.grantReadWriteData(this.consultasAdminLambda);
     props.solicitudesTable.grantReadWriteData(this.consultasLambda);
     props.solicitudesTable.grantReadWriteData(this.consultasAdminLambda);
     props.relacionesTable.grantReadWriteData(this.catalogoParserLambda);

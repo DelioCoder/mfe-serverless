@@ -11,10 +11,11 @@ const dynamoDB = DynamoDBDocumentClient.from(client);
 
 const mfesTabla = process.env.MFES_TABLE!;
 const solicitudTabla = process.env.SOLICITUDES_TABLE!;
+const secuenciaIdTabla = process.env.SECUENCIA_ID_TABLE!;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   try {
-    
+
     const claims = event.requestContext.authorizer?.claims;
     const isAdmin = claims['cognito:groups'] && claims['cognito:groups'].includes('admin') ? true : false;
 
@@ -51,17 +52,36 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
 
         const informacionMfe = solicitud.Item.metadata;
-
         const solicitado_por = solicitud.Item.solicitado_por;
 
+        const nombreMfe = informacionMfe.nombre;
+        const tipo = informacionMfe.tipo;
+
+        const prefijo = tipo[0].toUpperCase() + nombreMfe.substring(0, 4).toUpperCase();
+
         if (event.resource.endsWith("approve")) {
+
+          const seqResult = await dynamoDB.send(new UpdateCommand({
+          TableName: secuenciaIdTabla,
+          Key: { pk: "global_counter" },
+          UpdateExpression: "SET lastNumber = if_not_exists(lastNumber, :start) + :inc",
+          ExpressionAttributeValues: {
+            ":start": 0,
+            ":inc": 1
+          },
+          ReturnValues: "UPDATED_NEW"
+        }));
+
+          const nextNumber = seqResult.Attributes!.lastNumber;
+          const mfeId = `${prefijo}${String(nextNumber).padStart(3, "0")}`;
 
           await dynamoDB.send(new PutCommand({
             TableName: mfesTabla,
             Item: {
-              mfe_id: uuid(),
+              mfe_id: mfeId,
               ...informacionMfe,
-              createdAt: new Date().toISOString(),
+              pk: "MFEs",
+              createdAt: Date.now(),
               status: 'approved'
             }
           }))

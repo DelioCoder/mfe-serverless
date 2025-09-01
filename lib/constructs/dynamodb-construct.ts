@@ -6,6 +6,7 @@ export class DynamoDbConstruct extends Construct {
   public readonly solicitudesTable: dynamodb.Table;
   public readonly relacionesTable: dynamodb.Table;
   public readonly auditoriaTable: dynamodb.Table;
+  public readonly secuenciaIdTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string) {
     super(scope, id);
@@ -14,6 +15,13 @@ export class DynamoDbConstruct extends Construct {
       tableName: 'MFEsTabla',
       partitionKey: { name: 'mfe_id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    this.mfesTable.addGlobalSecondaryIndex({
+      indexName: 'CreatedAtIndex',
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.NUMBER },
+      projectionType: dynamodb.ProjectionType.ALL,
     });
 
     this.solicitudesTable = new dynamodb.Table(this, 'SolicitudesTable', {
@@ -25,6 +33,12 @@ export class DynamoDbConstruct extends Construct {
     this.relacionesTable = new dynamodb.Table(this, 'RelacionesTable', {
       tableName: 'RelacionesTabla',
       partitionKey: { name: 'relation_id', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    this.secuenciaIdTable = new dynamodb.Table(this, 'SecuenciaId-Table', {
+      tableName: 'SecuenciaId-Tabla',
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 

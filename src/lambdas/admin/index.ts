@@ -1,13 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { v4 as uuid } from 'uuid';
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { sendEmail } from "./resources/sns";
-import { plainToInstance } from 'class-transformer';
-import { UpdateMfeDto } from "./interfaces/update-mfe.dto";
-
-const client = new DynamoDBClient({});
-const dynamoDB = DynamoDBDocumentClient.from(client);
+import { bodyValidation, MessageDto } from "./interfaces";
+import { getMfeById, getRequestById, insertMfeApproved, updateMfeApproved, updateMfeRequestStatus, updateSecuencialTable } from "./resources/dynamodb";
 
 const mfesTabla = process.env.MFES_TABLE!;
 const solicitudTabla = process.env.SOLICITUDES_TABLE!;
@@ -24,107 +18,91 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     const { body } = event;
-    const input = JSON.parse(body || '');
-    const bodyFormatted = plainToInstance(UpdateMfeDto, input);
 
-    const id = event.pathParameters?.id;
+    if (!body) {
+      return { statusCode: 400, body: JSON.stringify("No hay información en el cuerpo de solicitud") }
+    }
+
+    const input = JSON.parse(body || '');
+
+    await bodyValidation(body, MessageDto);
+
+    const requestId = event.pathParameters?.id;
+
+    if (!requestId) {
+      return { statusCode: 400, body: JSON.stringify("Falta id") };
+    }
 
     switch (event.httpMethod) {
 
-      // PUT /admin/mfes/{id}/approve → aprobar solicitud
       case "PUT":
-        if (!id) {
-          return { statusCode: 400, body: JSON.stringify({ message: "Falta id" }) };
-        }
 
-        const solicitud = await dynamoDB.send(new GetCommand({
-          TableName: solicitudTabla,
-          Key: {
-            request_id: id
-          }
-        }));
+        const solicitud = await getRequestById(solicitudTabla, requestId);
 
         if (!solicitud.Item) {
           return {
             statusCode: 404,
-            body: `Item with id ${id} doesn't exist`
+            body: `Item with id ${requestId} doesn't exist`
           }
         }
 
         const informacionMfe = solicitud.Item.metadata;
         const solicitado_por = solicitud.Item.solicitado_por;
 
-        const nombreMfe = informacionMfe.nombre;
-        const tipo = informacionMfe.tipo;
-
-        const prefijo = tipo[0].toUpperCase() + nombreMfe.substring(0, 4).toUpperCase();
-
+        // PUT /admin/mfes/{id}/approve → aprobar solicitud
         if (event.resource.endsWith("approve")) {
 
-          const seqResult = await dynamoDB.send(new UpdateCommand({
-          TableName: secuenciaIdTabla,
-          Key: { pk: "global_counter" },
-          UpdateExpression: "SET lastNumber = if_not_exists(lastNumber, :start) + :inc",
-          ExpressionAttributeValues: {
-            ":start": 0,
-            ":inc": 1
-          },
-          ReturnValues: "UPDATED_NEW"
-        }));
+          if (informacionMfe.mfe_id) {
+
+            const mfeDb = await getMfeById(mfesTabla, informacionMfe.mfe_id);
+
+            if (mfeDb) {
+              await updateMfeApproved(mfesTabla, informacionMfe.mfe_id, { solicitado_por, ...informacionMfe });
+
+              await updateMfeRequestStatus(solicitudTabla, requestId, 'aprobado');
+
+              await sendEmail(solicitado_por, input.mensaje, "aceptado");
+
+              return { statusCode: 200, body: JSON.stringify({ message: `Actualización de MFe ${informacionMfe.mfe_id} aprobada` }) };
+            }
+
+          }
+
+          const nombreMfe = informacionMfe.nombre;
+          const tipo = informacionMfe.tipo;
+
+          const prefijo = tipo[0].toUpperCase() + nombreMfe.substring(0, 4).toUpperCase();
+
+          const seqResult = await updateSecuencialTable(secuenciaIdTabla);
 
           const nextNumber = seqResult.Attributes!.lastNumber;
           const mfeId = `${prefijo}${String(nextNumber).padStart(3, "0")}`;
 
-          await dynamoDB.send(new PutCommand({
-            TableName: mfesTabla,
-            Item: {
-              mfe_id: mfeId,
-              ...informacionMfe,
-              pk: "MFEs",
-              createdAt: Date.now(),
-              status: 'approved'
-            }
-          }))
+          await insertMfeApproved(mfesTabla, mfeId, {solicitado_por, ...informacionMfe});
 
-          await dynamoDB.send(new UpdateCommand({
-            TableName: solicitudTabla,
-            Key: { request_id: id },
-            UpdateExpression: "SET #st = :approved",
-            ExpressionAttributeNames: { "#st": "status" },
-            ExpressionAttributeValues: { ":approved": "aprovado" }
-          }));
+          await updateMfeRequestStatus(solicitudTabla, requestId, 'aprobado');
 
-          await sendEmail(solicitado_por, bodyFormatted.mensaje, "aceptado");
+          await sendEmail(solicitado_por, input.mensaje, "aceptado");
 
-          return { statusCode: 200, body: JSON.stringify({ message: "MFE aprobado" }) };
+          return { statusCode: 200, body: JSON.stringify({ message: `Registro de MFe ${mfeId} aprobada` }) };
         }
 
+        // PUT /admin/mfes/{id}/reject → rechazar solicitud
         if (event.resource.endsWith("reject")) {
 
-          await dynamoDB.send(new UpdateCommand({
-            TableName: solicitudTabla,
-            Key: { request_id: id },
-            UpdateExpression: "SET #st = :value",
-            ExpressionAttributeNames: { "#st": "status" },
-            ExpressionAttributeValues: { ":value": "rechazado" }
-          }))
+          await updateMfeRequestStatus(solicitudTabla, requestId, 'rechazado');
 
-          await sendEmail(solicitado_por, bodyFormatted.mensaje, "rechazado");
+          await sendEmail(solicitado_por, input.mensaje, "rechazado");
 
           return { statusCode: 200, body: JSON.stringify({ message: "MFE rechazado" }) };
         }
 
+        // PUT /admin/mfes/{id}/under-review → Realizar observaciones a la solicitud
         if (event.resource.endsWith("under-review")) {
 
-          await dynamoDB.send(new UpdateCommand({
-            TableName: solicitudTabla,
-            Key: { request_id: id },
-            UpdateExpression: "SET #st = :value",
-            ExpressionAttributeNames: { "#st": "status" },
-            ExpressionAttributeValues: { ":value": "Bajo supervisión" }
-          }))
+          await updateMfeRequestStatus(solicitudTabla, requestId, 'bajo observación');
 
-          await sendEmail(solicitado_por, bodyFormatted.mensaje, "observado");
+          await sendEmail(solicitado_por, input.mensaje, "observado");
 
           return { statusCode: 200, body: JSON.stringify({ message: "MFE observado" }) };
         }
@@ -135,7 +113,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         return { statusCode: 405, body: JSON.stringify({ message: "Método no soportado" }) };
     }
   } catch (err: any) {
-    console.error(err);
-    return { statusCode: 500, body: JSON.stringify({ message: "Error interno", error: err.message }) };
+    return { statusCode: 500, body: JSON.stringify(err.message) };
   }
 };

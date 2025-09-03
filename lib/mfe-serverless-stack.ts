@@ -4,6 +4,7 @@ import { DynamoDbConstruct } from './constructs/dynamodb-construct';
 import { LambdaConstruct } from './constructs/lambda-construct';
 import { ApiGatewayCanalConstruct } from './constructs/apigateway-canal-construct';
 import { ApiGatewayTecnicaConstruct } from './constructs/apigateway-tecnica-construct';
+import { S3Construct } from './constructs/s3-construct';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class MfeServerlessStack extends cdk.Stack {
@@ -33,8 +34,11 @@ export class MfeServerlessStack extends cdk.Stack {
       userPoolId: 'us-east-1_Yp30UfnkP'
     });
 
+    const s3 = new S3Construct(this, 'MfeMetadaBucket');
+
     new cdk.CfnOutput(this, "ApiCanalUrl", { value: apiCanal.api.url });
     new cdk.CfnOutput(this, "ApiTecnicalUrl", { value: apiTecnica.api.url });
+    new cdk.CfnOutput(this, "metadataBucket", { value: s3.metaDataBucket.bucketName })
 
   }
 }

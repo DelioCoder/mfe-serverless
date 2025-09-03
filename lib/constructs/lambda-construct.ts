@@ -4,6 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from 'path';
+import * as cdk from "aws-cdk-lib";
 
 export interface LambdaConstructProps {
   mfesTable: dynamodb.Table;
@@ -31,10 +32,11 @@ export class LambdaConstruct extends Construct {
       },
       bundling: {
         forceDockerBundling: false,
-        nodeModules: ['uuid', 'class-transformer', 'class-validator']
+        nodeModules: ['uuid', 'class-transformer', 'class-validator', 'reflect-metadata']
       },
       depsLockFilePath: path.join(__dirname, '../../src/lambdas/consultas/package-lock.json'),
-      
+      memorySize: 512,
+      timeout: cdk.Duration.seconds(10)
     });
 
 
@@ -49,9 +51,10 @@ export class LambdaConstruct extends Construct {
       },
       bundling: {
         forceDockerBundling: false,
-        nodeModules: ['uuid', 'class-transformer', 'class-validator']
+        nodeModules: ['class-transformer', 'class-validator']
       },
       depsLockFilePath: path.join(__dirname, '../../src/lambdas/admin/package-lock.json'),
+      memorySize: 512
     });
 
     this.consultasAdminLambda.addToRolePolicy(

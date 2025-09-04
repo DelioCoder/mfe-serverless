@@ -1,4 +1,30 @@
-nombre: "MFE_Seguros_Vida"
-tipo: "componente"
-version: "3.0.0"
-estado: "pendiente test"
+plataforma: "BackOffice Finanzas"
+
+microfrontends:
+  - id: mfe-001
+    nombre: "Estructura"
+    tipo: "pagina"
+    version: "1.0.0"
+    repositorio: "https://github.com/empresa/finanzas-estructura"
+    estado: "activo"
+
+  - id: mfe-002
+    nombre: "Remesas"
+    tipo: "componente"
+    version: "1.0.0"
+    repositorio: "https://github.com/empresa/finanzas-remesas"
+    estado: "activo"
+
+  - id: mfe-003
+    nombre: "Reseguro"
+    tipo: "componente"
+    version: "1.0.0"
+    repositorio: "https://github.com/empresa/finanzas-reseguro"
+    estado: "activo"
+
+  - id: mfe-004
+    nombre: "Pagos"
+    tipo: "componente"
+    version: "1.0.0"
+    repositorio: "https://github.com/empresa/finanzas-pagos"
+    estado: "activo"

@@ -24,7 +24,7 @@ microfrontends:
 
   - id: mfe-004
     nombre: "Pagos"
-    tipo: "componente"
+    tipo: "componentes"
     version: "1.0.0"
     repositorio: "https://github.com/empresa/finanzas-pagos"
     estado: "activo"

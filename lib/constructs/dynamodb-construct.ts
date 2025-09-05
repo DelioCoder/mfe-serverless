@@ -1,5 +1,6 @@
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as cdk from "aws-cdk-lib";
 
 export class DynamoDbConstruct extends Construct {
   public readonly mfesTable: dynamodb.Table;
@@ -30,10 +31,17 @@ export class DynamoDbConstruct extends Construct {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
-    this.relacionesTable = new dynamodb.Table(this, 'RelacionesTable', {
-      tableName: 'RelacionesTabla',
-      partitionKey: { name: 'relation_id', type: dynamodb.AttributeType.STRING },
+    this.relacionesTable = new dynamodb.Table(this, "RelacionesTable", {
+      tableName: "RelacionesTabla",
+      partitionKey: { name: "plataforma", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "mfe_id", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // dev
+    });
+
+    this.relacionesTable.addGlobalSecondaryIndex({
+      indexName: 'MfeIndexId',
+      partitionKey: { name: 'mfe_id', type: dynamodb.AttributeType.STRING }
     });
 
     this.secuenciaIdTable = new dynamodb.Table(this, 'SecuenciaId-Table', {
@@ -42,9 +50,10 @@ export class DynamoDbConstruct extends Construct {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
-    // this.auditoriaTable = new dynamodb.Table(this, 'LogsAuditoriaTable', {
-    //   partitionKey: { name: 'log_id', type: dynamodb.AttributeType.STRING },
-    //   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-    // });
+    this.auditoriaTable = new dynamodb.Table(this, 'LogsAuditoriaTable', {
+      tableName: 'Auditorias-Tabla',
+      partitionKey: { name: 'log_id', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
   }
 }

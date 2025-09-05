@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { getAllMfes, getMfeById, insertMfeRequestToBD } from './resources/dynamodb';
+import { getAllMfes, getOneMfe, insertMfeRequestToBD } from './resources/dynamodb';
 import { bodyValidation, CreateMfeDto, UpdateMfeDto } from './dto';
 
 const mfesTable = process.env.MFES_TABLE!;
@@ -16,44 +16,53 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const cursor = queryParams?.next || void 0;
 
   try {
-    
+
     switch (event.httpMethod) {
       // GET /consultas → lista MFEs
       case "GET":
-        if (event.pathParameters?.id) {
 
-          const result = await getMfeById(mfesTable, event.pathParameters?.id);
-
+        if (event.resource === "/mfes/{term}") {
+          const term = event.pathParameters!.term;
+          const result = await getOneMfe(mfesTable, term!);
           return { statusCode: 200, body: JSON.stringify(result) };
         }
 
-        const result = await getAllMfes(mfesTable, limit, cursor);
+        // if (event.resource === "/mfes/requests/{id}") {
+        //   const requestId = event.pathParameters!.id;
+        //   const request = await getMfeRequestsById(solicitudesTable, requestId!);
+        //   return { statusCode: 200, body: JSON.stringify(request) };
+        // }
 
-        const nextCursor = result.LastEvaluatedKey
-          ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey))
-          : null;
+        if (event.resource === "/mfes") {
+          const result = await getAllMfes(mfesTable, limit, cursor);
+          const nextCursor = result.LastEvaluatedKey
+            ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey))
+            : null;
 
-        return {
-          statusCode: 200,
-          body: JSON.stringify({
-            data: result.Items,
-            next: result.Items!.length < limit ? null : nextCursor,
-            meta: {
-              hasMore: nextCursor ? true : false
-            }
-          })
-        };
+          return {
+            statusCode: 200,
+            body: JSON.stringify({
+              data: result.Items,
+              next: result.Items!.length < limit ? null : nextCursor,
+              meta: {
+                hasMore: !!nextCursor
+              }
+            })
+          };
+        }
+
+        return { statusCode: 404, body: JSON.stringify({ message: "Ruta GET no encontrada" }) };
 
       // POST /consultas → solicitud de nuevo MFE
       case "POST":
 
         if (!body) {
-          return { statusCode: 400, body: JSON.stringify({ error: 'Empty body' }) }
+          return { statusCode: 400, body: JSON.stringify({ error: 'Cuerpo vacio' }) }
         }
 
         const createBody = await bodyValidation(body, CreateMfeDto);
 
-        const createMfeRequestId = await insertMfeRequestToBD(solicitudesTable, createBody, 'create');
+        const createMfeRequestId = await insertMfeRequestToBD(solicitudesTable, createBody, 'registro');
 
         return { statusCode: 201, body: JSON.stringify({ message: "Solicitud creada", createMfeRequestId }) };
 
@@ -69,7 +78,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
         const updateBody = await bodyValidation(body, UpdateMfeDto);
 
-        const updateMfeRequestId = await insertMfeRequestToBD(solicitudesTable, { mfe_id: mfeId, ...updateBody }, 'update');
+        const updateMfeRequestId = await insertMfeRequestToBD(solicitudesTable, { mfe_id: mfeId, ...updateBody }, 'actualización');
 
         return { statusCode: 201, body: JSON.stringify({ message: "Solicitud de actualización enviada", requestId: updateMfeRequestId }) };
 

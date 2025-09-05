@@ -1,7 +1,8 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { sendEmail } from "./resources/sns";
 import { bodyValidation, MessageDto } from "./interfaces";
-import { getMfeById, getRequestById, insertMfeApproved, updateMfeApproved, updateMfeRequestStatus, updateSecuencialTable } from "./resources/dynamodb";
+import { getAllRequest, getMfeById, getRequestById, insertMfeApproved, updateMfeApproved, updateMfeRequestStatus, updateSecuencialTable } from "./resources/dynamodb";
+import { insertIntoAuditTable } from "./resources/dynamodb/audit";
 
 const mfesTabla = process.env.MFES_TABLE!;
 const solicitudTabla = process.env.SOLICITUDES_TABLE!;
@@ -14,43 +15,69 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const isAdmin = claims['cognito:groups'] && claims['cognito:groups'].includes('admin') ? true : false;
 
     if (!isAdmin) {
-      return { statusCode: 400, body: JSON.stringify({ message: 'Unauthorized' }) }
+      return { statusCode: 403, body: JSON.stringify({ message: 'Unauthorized' }) }
     }
 
-    const { body } = event;
-
-    if (!body) {
-      return { statusCode: 400, body: JSON.stringify("No hay información en el cuerpo de solicitud") }
-    }
-
-    const input = JSON.parse(body || '');
-
-    await bodyValidation(body, MessageDto);
-
-    const requestId = event.pathParameters?.id;
-
-    if (!requestId) {
-      return { statusCode: 400, body: JSON.stringify("Falta id") };
-    }
+    const adminUsername = claims['cognito:username'];
 
     switch (event.httpMethod) {
 
+      case "GET":
+
+        if (event.resource === "/admin/mfes-request") {
+          const nextKey = event.queryStringParameters?.nextKey
+            ? JSON.parse(event.queryStringParameters.nextKey)
+            : undefined;
+
+          const resp = await getAllRequest(solicitudTabla, nextKey);
+
+          return {
+            statusCode: 200,
+            body: JSON.stringify({
+              items: resp.Items,
+              nextKey: resp.LastEvaluatedKey ? JSON.stringify(resp.LastEvaluatedKey) : null
+            })
+          };
+        }
+
+        if (event.resource === "/admin/mfes-request/{id}") {
+          const requestBD = await getRequestById(solicitudTabla, event.pathParameters!.id!);
+
+          return { statusCode: 200, body: JSON.stringify(requestBD) };
+        }
+
       case "PUT":
+
+        const { body } = event;
+
+        if (!body) {
+          return { statusCode: 400, body: JSON.stringify("No hay información en el cuerpo de solicitud") }
+        }
+
+        const input = JSON.parse(body || '');
+
+        await bodyValidation(body, MessageDto);
+
+        const requestId = event.pathParameters?.id;
+
+        if (!requestId) {
+          return { statusCode: 400, body: JSON.stringify("Falta id") };
+        }
 
         const solicitud = await getRequestById(solicitudTabla, requestId);
 
-        if (!solicitud.Item) {
+        if (!solicitud) {
           return {
             statusCode: 404,
             body: `Item with id ${requestId} doesn't exist`
           }
         }
-
-        const informacionMfe = solicitud.Item.metadata;
-        const solicitado_por = solicitud.Item.solicitado_por;
+        
+        const informacionMfe = solicitud!.detalle;
+        const solicitado_por = solicitud!.solicitado_por;
 
         // PUT /admin/mfes/{id}/approve → aprobar solicitud
-        if (event.resource.endsWith("approve")) {
+        if (event.path.endsWith("approve")) {
 
           if (informacionMfe.mfe_id) {
 
@@ -78,9 +105,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           const nextNumber = seqResult.Attributes!.lastNumber;
           const mfeId = `${prefijo}${String(nextNumber).padStart(3, "0")}`;
 
-          await insertMfeApproved(mfesTabla, mfeId, {solicitado_por, ...informacionMfe});
-
           await updateMfeRequestStatus(solicitudTabla, requestId, 'aprobado');
+          
+          await insertMfeApproved(mfesTabla, mfeId, { solicitado_por, ...informacionMfe });
+
+          await insertIntoAuditTable('Auditorias-Tabla', { admin: adminUsername, usuario_solicitante: solicitado_por, accion: 'aprobación de mfe', motivo: input.mensaje });
 
           await sendEmail(solicitado_por, input.mensaje, "aceptado");
 
@@ -88,7 +117,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
 
         // PUT /admin/mfes/{id}/reject → rechazar solicitud
-        if (event.resource.endsWith("reject")) {
+        if (event.path.endsWith("reject")) {
 
           await updateMfeRequestStatus(solicitudTabla, requestId, 'rechazado');
 
@@ -98,7 +127,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         }
 
         // PUT /admin/mfes/{id}/under-review → Realizar observaciones a la solicitud
-        if (event.resource.endsWith("under-review")) {
+        if (event.path.endsWith("under-review")) {
 
           await updateMfeRequestStatus(solicitudTabla, requestId, 'bajo observación');
 

@@ -1,4 +1,4 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { UpdateMfeDto } from "../../interfaces";
 
@@ -18,6 +18,16 @@ export const getMfeById = async (tableName: string, mfeId: string) => {
     return mfeDB;
 }
 
+export const getAllRequest = async (tableName: string, nextKey: any) => {
+    const resp = await dynamoDB.send(new ScanCommand({
+        TableName: tableName,
+        Limit: 10,
+        ExclusiveStartKey: nextKey
+    }));
+
+    return resp;
+}
+
 export const getRequestById = async (tableName: string, requestId: string) => {
     const solicitud = await dynamoDB.send(new GetCommand({
         TableName: tableName,
@@ -26,7 +36,7 @@ export const getRequestById = async (tableName: string, requestId: string) => {
         }
     }));
 
-    return solicitud;
+    return solicitud.Item;
 }
 
 export const updateSecuencialTable = async (tableName: string) => {
@@ -103,10 +113,10 @@ export const updateMfeApproved = async (mfeTable: string, mfeId: string, updateB
 
 }
 
-export const updateMfeRequestStatus = async (solicitudTable: string, requestId: string, status: RequestStatus) => {
+export const updateMfeRequestStatus = async (requestTable: string, requestId: string, status: RequestStatus) => {
 
     await dynamoDB.send(new UpdateCommand({
-        TableName: solicitudTable,
+        TableName: requestTable,
         Key: { request_id: requestId },
         UpdateExpression: "SET #st = :status_value",
         ExpressionAttributeNames: { "#st": "status" },

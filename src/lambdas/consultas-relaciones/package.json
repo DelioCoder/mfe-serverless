@@ -1,5 +1,5 @@
 {
-  "name": "catalogo-parser",
+  "name": "consultas-relaciones",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,5 +10,8 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "types": "./index.d.ts"
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.882.0",
+    "@aws-sdk/lib-dynamodb": "^3.882.0"
+  }
 }

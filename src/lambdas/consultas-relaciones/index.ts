@@ -7,7 +7,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     try {
 
         if(!event.pathParameters?.id){
-            return { statusCode: 400, body: JSON.stringify('No se proporciono nombre de plataforma') }
+            return { statusCode: 400, body: JSON.stringify('No se proporciono el id del microfrontend') }
         }
 
         const platformName = decodeURIComponent(event.pathParameters.id);

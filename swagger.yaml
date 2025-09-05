@@ -1,0 +1,171 @@
+/mfes:
+  get:
+    summary: Listar MFEs
+    description: Devuelve el listado de todos los MFEs registrados.
+    security:
+      - cognitoAuth: []
+    responses:
+      "200":
+        description: Lista de MFEs
+
+/mfes/{term}:
+  get:
+    summary: Buscar MFE por término
+    description: Busca un MFE por nombre, dominio u otro identificador.
+    parameters:
+      - name: term
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    responses:
+      "200":
+        description: MFE encontrado
+
+/mfes/requests:
+  post:
+    summary: Crear solicitud de registro de MFE
+    description: Permite a un usuario enviar la solicitud para registrar un nuevo MFE.
+    security:
+      - cognitoAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MfeRequest"
+    responses:
+      "201":
+        description: Solicitud creada exitosamente
+
+/mfes/requests/{id}:
+  put:
+    summary: Actualizar solicitud de MFE
+    description: Actualiza los datos de una solicitud enviada previamente.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/MfeRequest"
+    responses:
+      "200":
+        description: Solicitud actualizada
+
+/mfe-relaciones/{id}:
+  get:
+    summary: Consultar relaciones de un MFE
+    description: Devuelve las relaciones de un MFE con otros.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    responses:
+      "200":
+        description: Relaciones encontradas
+
+/admin/mfes-request:
+  get:
+    summary: Listar solicitudes de MFEs
+    description: Lista todas las solicitudes pendientes o procesadas para revisión.
+    security:
+      - cognitoAuth: []
+    responses:
+      "200":
+        description: Lista de solicitudes
+
+/admin/mfes-request/{id}:
+  get:
+    summary: Obtener detalle de solicitud
+    description: Devuelve el detalle de una solicitud específica de registro de MFE.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    responses:
+      "200":
+        description: Detalle de la solicitud
+
+/admin/mfes-request/{id}/approve:
+  put:
+    summary: Aprobar solicitud de MFE
+    description: Marca la solicitud como aprobada.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AdminAction"
+    responses:
+      "200":
+        description: Solicitud aprobada
+
+/admin/mfes-request/{id}/reject:
+  put:
+    summary: Rechazar solicitud de MFE
+    description: Marca la solicitud como rechazada con un mensaje.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AdminAction"
+    responses:
+      "200":
+        description: Solicitud rechazada
+
+/admin/mfes-request/{id}/under-review:
+  put:
+    summary: Marcar solicitud como bajo revisión
+    description: Cambia el estado de la solicitud a “bajo supervisión”.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    security:
+      - cognitoAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AdminAction"
+    responses:
+      "200":
+        description: Solicitud marcada bajo revisión

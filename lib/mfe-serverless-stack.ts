@@ -1,4 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3'
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import { Construct } from 'constructs';
 import { DynamoDbConstruct } from './constructs/dynamodb-construct';
 import { LambdaConstruct } from './constructs/lambda-construct';
@@ -19,11 +21,12 @@ export class MfeServerlessStack extends cdk.Stack {
       mfesTable: dynamoDB.mfesTable,
       relacionesTable: dynamoDB.relacionesTable,
       solicitudesTable: dynamoDB.solicitudesTable,
-      secuenciaIdTable: dynamoDB.secuenciaIdTable
+      secuenciaIdTable: dynamoDB.secuenciaIdTable,
+      auditoriaTable: dynamoDB.auditoriaTable,
     });
 
     const apiTecnica = new ApiGatewayTecnicaConstruct(this, 'tecnica-api', {
-      catalogoParserLambda: lambdas.catalogoParserLambda,
+      relacionesLambda: lambdas.relacionesLambda,
       consultasAdminLambda: lambdas.consultasAdminLambda,
       consultasLambda: lambdas.consultasLambda,
       userPoolId: 'us-east-1_Yp30UfnkP'
@@ -34,11 +37,21 @@ export class MfeServerlessStack extends cdk.Stack {
       userPoolId: 'us-east-1_Yp30UfnkP'
     });
 
-    const s3 = new S3Construct(this, 'MfeMetadaBucket');
+    const s3Construct = new S3Construct(this, 'MfeMetadaBucket');
+
+    s3Construct.metaDataBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED_PUT,
+      new s3n.LambdaDestination(lambdas.parseoLambda),
+      {
+        suffix: "yaml" // -> Aceptar solo .yaml
+      }
+    )
+
+    s3Construct.metaDataBucket.grantRead(lambdas.parseoLambda);
 
     new cdk.CfnOutput(this, "ApiCanalUrl", { value: apiCanal.api.url });
     new cdk.CfnOutput(this, "ApiTecnicalUrl", { value: apiTecnica.api.url });
-    new cdk.CfnOutput(this, "metadataBucket", { value: s3.metaDataBucket.bucketName })
+    new cdk.CfnOutput(this, "metadataBucket", { value: s3Construct.metaDataBucket.bucketName })
 
   }
 }

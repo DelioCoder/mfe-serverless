@@ -6,7 +6,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 export interface ApiGatewayTecnicaConstructProps {
   consultasLambda: lambda.IFunction;
   consultasAdminLambda: lambda.IFunction;
-  catalogoParserLambda: lambda.IFunction;
+  relacionesLambda: lambda.IFunction;
   userPoolId: string;
 }
 
@@ -27,24 +27,28 @@ export class ApiGatewayTecnicaConstruct extends Construct {
     });
 
     authorizer._attachToApi(this.api)
+    // /mfes
+    const mfes = this.api.root.addResource("mfes");
 
-    // /mfes/requests
-    const requests = this.api.root.addResource("mfes").addResource("requests");
-    requests.addMethod("GET", new apigw.LambdaIntegration(props.consultasLambda), {
+    mfes.addMethod('GET', new apigw.LambdaIntegration(props.consultasLambda), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO
     });
+
+    const mfeByTerm = mfes.addResource("{term}");
+    mfeByTerm.addMethod("GET", new apigw.LambdaIntegration(props.consultasLambda), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO
+    });
+
+    // /mfes/requests
+    const requests = mfes.addResource("requests");
     requests.addMethod("POST", new apigw.LambdaIntegration(props.consultasLambda), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO
     });
 
     const requestById = requests.addResource("{id}");
-
-    requestById.addMethod("GET", new apigw.LambdaIntegration(props.consultasLambda), {
-      authorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO
-    });
     requestById.addMethod("PUT", new apigw.LambdaIntegration(props.consultasLambda), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO
@@ -52,30 +56,35 @@ export class ApiGatewayTecnicaConstruct extends Construct {
 
 
     // /admin/mfes
-    const admin = this.api.root.addResource('admin');
-    const mfes = admin.addResource('mfes');
-    mfes.addMethod('GET', new apigw.LambdaIntegration(props.consultasAdminLambda), {
-      authorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO
-    });
-    const mfeById = mfes.addResource('{id}');
-    mfeById.addResource('approve').addMethod('PUT', new apigw.LambdaIntegration(props.consultasAdminLambda), {
-      authorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO
-    });
-    mfeById.addResource('reject').addMethod('PUT', new apigw.LambdaIntegration(props.consultasAdminLambda), {
-      authorizer,
-      authorizationType: apigw.AuthorizationType.COGNITO
-    });
-    mfeById.addResource('under-review').addMethod('PUT', new apigw.LambdaIntegration(props.consultasAdminLambda), {
+    const adminRoute = this.api.root.addResource('admin');
+
+    const adminMfesRoute = adminRoute.addResource('mfes-request');
+    adminMfesRoute.addMethod('GET', new apigw.LambdaIntegration(props.consultasAdminLambda), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO
     });
 
-    // /parser
-    this.api.root.addResource('parser').addMethod('PUT', new apigw.LambdaIntegration(props.catalogoParserLambda), {
+    const adminMfeRequestRoute = adminMfesRoute.addResource('{id}');
+    adminMfeRequestRoute.addMethod("GET", new apigw.LambdaIntegration(props.consultasAdminLambda), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO
     });
+    adminMfeRequestRoute.addResource('approve').addMethod('PUT', new apigw.LambdaIntegration(props.consultasAdminLambda), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO
+    });
+    adminMfeRequestRoute.addResource('reject').addMethod('PUT', new apigw.LambdaIntegration(props.consultasAdminLambda), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO
+    });
+    adminMfeRequestRoute.addResource('under-review').addMethod('PUT', new apigw.LambdaIntegration(props.consultasAdminLambda), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO
+    });
+
+    // [/relaciones]
+    this.api.root.addResource('mfe-relaciones')
+      .addResource('{id}')
+      .addMethod('GET', new apigw.LambdaIntegration(props.relacionesLambda), { authorizer, authorizationType: apigw.AuthorizationType.COGNITO })
   }
 }

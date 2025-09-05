@@ -11,20 +11,21 @@ export interface LambdaConstructProps {
   solicitudesTable: dynamodb.Table;
   relacionesTable: dynamodb.Table;
   secuenciaIdTable: dynamodb.Table;
-  auditoriaTable?: dynamodb.Table;
+  auditoriaTable: dynamodb.Table;
 }
 
 export class LambdaConstruct extends Construct {
   public readonly consultasLambda: lambdaNodejs.NodejsFunction;
   public readonly consultasAdminLambda: lambdaNodejs.NodejsFunction;
-  public readonly catalogoParserLambda: lambdaNodejs.NodejsFunction;
+  public readonly parseoLambda: lambdaNodejs.NodejsFunction;
+  public readonly relacionesLambda: lambdaNodejs.NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaConstructProps) {
     super(scope, id);
 
     this.consultasLambda = new lambdaNodejs.NodejsFunction(this, 'ConsultasLambda', {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: path.join(__dirname, '../../src/lambdas/consultas/index.ts'),
+      entry: path.join(__dirname, '../../src/lambdas/consultas-mfe/index.ts'),
       handler: 'handler',
       environment: {
         MFES_TABLE: props.mfesTable.tableName,
@@ -34,15 +35,14 @@ export class LambdaConstruct extends Construct {
         forceDockerBundling: false,
         nodeModules: ['uuid', 'class-transformer', 'class-validator', 'reflect-metadata']
       },
-      depsLockFilePath: path.join(__dirname, '../../src/lambdas/consultas/package-lock.json'),
+      depsLockFilePath: path.join(__dirname, '../../src/lambdas/consultas-mfe/package-lock.json'),
       memorySize: 512,
       timeout: cdk.Duration.seconds(10)
     });
 
-
     this.consultasAdminLambda = new lambdaNodejs.NodejsFunction(this, 'ConsultasAdminLambda', {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: path.join(__dirname, '../../src/lambdas/admin/index.ts'),
+      entry: path.join(__dirname, '../../src/lambdas/consultas-admin/index.ts'),
       handler: 'handler',
       environment: {
         MFES_TABLE: props.mfesTable.tableName,
@@ -51,36 +51,54 @@ export class LambdaConstruct extends Construct {
       },
       bundling: {
         forceDockerBundling: false,
-        nodeModules: ['class-transformer', 'class-validator']
+        nodeModules: ['class-transformer', 'class-validator', 'uuid']
       },
-      depsLockFilePath: path.join(__dirname, '../../src/lambdas/admin/package-lock.json'),
+      depsLockFilePath: path.join(__dirname, '../../src/lambdas/consultas-admin/package-lock.json'),
       memorySize: 512
     });
 
-    this.consultasAdminLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ses:SendEmail", "ses:SendRawEmail"],
-        resources: ["*"], // Ojo: puedes restringir a identities específicas
-      })
-    )
-    
-    this.catalogoParserLambda = new lambdaNodejs.NodejsFunction(this, 'CatalogoParserLambda', {
+    this.relacionesLambda = new lambdaNodejs.NodejsFunction(this, 'ConsultasRelacionesLambda', {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: path.join(__dirname, '../../src/lambdas/catalogo-parser/index.ts'),
+      entry: path.join(__dirname, '../../src/lambdas/consultas-relaciones/index.ts'),
+      handler: 'handler',
+      environment: {
+        RELACIONES_TABLA: props.relacionesTable.tableName,
+      },
+      bundling: {
+        forceDockerBundling: false,
+      },
+      depsLockFilePath: path.join(__dirname, '../../src/lambdas/consultas-relaciones/package-lock.json'),
+    });
+
+    this.parseoLambda = new lambdaNodejs.NodejsFunction(this, 'CatalogoParserLambda', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: path.join(__dirname, '../../src/lambdas/parser/index.ts'),
       handler: 'handler',
       environment: {
         RELACIONES_TABLE: props.relacionesTable.tableName,
       },
       bundling: {
         forceDockerBundling: false,
+        nodeModules: ['js-yaml', 'stream', 'uuid', 'class-validator', 'class-transformer', 'reflect-metadata']
       },
+      depsLockFilePath: path.join(__dirname, '../../src/lambdas/parser/package-lock.json'),
     });
+
+    this.consultasAdminLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ses:SendEmail", "ses:SendRawEmail"],
+        resources: ["*"], // OJO restringir a identities específicas! OJO
+      })
+    )
+
     // props.auditoriaTable.grantReadWriteData(this.consultasAdminLambda);
     props.mfesTable.grantReadWriteData(this.consultasLambda);
     props.mfesTable.grantReadWriteData(this.consultasAdminLambda);
     props.secuenciaIdTable.grantReadWriteData(this.consultasAdminLambda);
     props.solicitudesTable.grantReadWriteData(this.consultasLambda);
     props.solicitudesTable.grantReadWriteData(this.consultasAdminLambda);
-    props.relacionesTable.grantReadWriteData(this.catalogoParserLambda);
+    props.relacionesTable.grantReadWriteData(this.parseoLambda);
+    props.relacionesTable.grantReadData(this.relacionesLambda);
+    props.auditoriaTable.grantWriteData(this.consultasAdminLambda);
   }
 }

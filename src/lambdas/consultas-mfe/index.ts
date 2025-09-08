@@ -1,12 +1,12 @@
 import "reflect-metadata";
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getAllMfes, getOneMfe, insertMfeRequestToBD } from './resources/dynamodb';
 import { bodyValidation, CreateMfeDto, UpdateMfeDto } from './dto';
 
 const mfesTable = process.env.MFES_TABLE!;
 const solicitudesTable = process.env.SOLICITUDES_TABLE!;
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
   const { body } = event;
 

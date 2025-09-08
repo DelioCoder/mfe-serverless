@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { sendEmail } from "./resources/sns";
 import { bodyValidation, MessageDto } from "./interfaces";
 import { getAllRequest, getMfeById, getRequestById, insertMfeApproved, updateMfeApproved, updateMfeRequestStatus, updateSecuencialTable } from "./resources/dynamodb";
@@ -8,7 +8,7 @@ const mfesTabla = process.env.MFES_TABLE!;
 const solicitudTabla = process.env.SOLICITUDES_TABLE!;
 const secuenciaIdTabla = process.env.SECUENCIA_ID_TABLE!;
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
 
     const claims = event.requestContext.authorizer?.claims;

@@ -1,9 +1,9 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getRelacionesByMfeId } from "./resources/dynamodb";
 
 const RELACIONES_TABLA = process.env.RELACIONES_TABLA!;
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
 
         if(!event.pathParameters?.id){

@@ -86,5 +86,7 @@ export class ApiGatewayTecnicaConstruct extends Construct {
     this.api.root.addResource('mfe-relaciones')
       .addResource('{id}')
       .addMethod('GET', new apigw.LambdaIntegration(props.relacionesLambda), { authorizer, authorizationType: apigw.AuthorizationType.COGNITO })
+
   }
+
 }

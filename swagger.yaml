@@ -1,171 +1,333 @@
-/mfes:
-  get:
-    summary: Listar MFEs
-    description: Devuelve el listado de todos los MFEs registrados.
-    security:
-      - cognitoAuth: []
-    responses:
-      "200":
-        description: Lista de MFEs
+openapi: 3.0.1
+info:
+  title: Catálogo de MFEs
+  description: Plataforma para gestión de microfrontends en Rimac
+  version: "1.0.0"
 
-/mfes/{term}:
-  get:
-    summary: Buscar MFE por término
-    description: Busca un MFE por nombre, dominio u otro identificador.
-    parameters:
-      - name: term
-        in: path
-        required: true
-        schema:
+servers:
+  - url: https://api-tecnica.ejemplo.com/prod
+    description: API Técnica
+
+tags:
+  - name: Usuario
+    description: Endpoints disponibles para usuarios normales
+  - name: Administrador
+    description: Endpoints exclusivos para administradores del sistema
+
+components:
+  securitySchemes:
+    cognitoAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Autenticación con Amazon Cognito
+
+  schemas:
+    MfeRequest:
+      type: object
+      required:
+        - nombre
+        - dominio
+        - tipo
+        - criticidad
+        - estado
+        - descripcion
+        - repositorio
+        - versionReact
+        - versionReactDom
+        - versionMfe
+        - equipo
+        - solicitado_por
+      properties:
+        nombre:
           type: string
-    security:
-      - cognitoAuth: []
-    responses:
-      "200":
-        description: MFE encontrado
+        dominio:
+          type: string
+        tipo:
+          type: string
+          enum: [componente, pagina, widget]
+        criticidad:
+          type: string
+          enum: [alta, medio, baja]
+        estado:
+          type: string
+          enum: [pendiente, aprobado, rechazado, bajo supervisión]
+        descripcion:
+          type: string
+        repositorio:
+          type: string
+          format: uri
+        versionReact:
+          type: string
+        versionReactDom:
+          type: string
+        versionMfe:
+          type: string
+        equipo:
+          type: string
+        solicitado_por:
+          type: string
+          format: email
 
-/mfes/requests:
-  post:
-    summary: Crear solicitud de registro de MFE
-    description: Permite a un usuario enviar la solicitud para registrar un nuevo MFE.
-    security:
-      - cognitoAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
+    AdminAction:
+      type: object
+      required:
+        - mensaje
+      properties:
+        mensaje:
+          type: string
+
+security:
+  - cognitoAuth: []
+
+paths:
+  #################################
+  # 🔹 RUTAS USUARIO
+  #################################
+  /mfes:
+    get:
+      tags:
+        - Usuario
+      summary: Listar MFEs
+      description: Devuelve el listado de todos los MFEs registrados.
+      responses:
+        "200":
+          description: Lista de MFEs
+        "404":
+          description: Ruta no encontrada
+        "401":
+          description: No autorizado
+
+  /mfes/{term}:
+    get:
+      tags:
+        - Usuario
+      summary: Buscar MFE por término
+      description: Busca un MFE por nombre, dominio u otro identificador.
+      parameters:
+        - name: term
+          in: path
+          required: true
           schema:
-            $ref: "#/components/schemas/MfeRequest"
-    responses:
-      "201":
-        description: Solicitud creada exitosamente
+            type: string
+      responses:
+        "200":
+          description: MFE encontrado
+        "404":
+          description: Ruta no encontrada
+        "401":
+          description: No autorizado
+        
 
-/mfes/requests/{id}:
-  put:
-    summary: Actualizar solicitud de MFE
-    description: Actualiza los datos de una solicitud enviada previamente.
-    parameters:
-      - name: id
-        in: path
+  /mfes/requests:
+    post:
+      tags:
+        - Usuario
+      summary: Crear solicitud de registro de MFE
+      description: Permite a un usuario enviar la solicitud para registrar un nuevo MFE.
+      requestBody:
         required: true
-        schema:
-          type: string
-    security:
-      - cognitoAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MfeRequest"
+            example:
+              nombre: test
+              dominio: test.com
+              tipo: pagina
+              criticidad: medio
+              estado: pendiente
+              descripcion: test
+              repositorio: https://github.com/empresa/widget-clima
+              versionReact: "16.14.0"
+              versionReactDom: "16.14.0"
+              versionMfe: "0.5.2"
+              equipo: Test
+              solicitado_por: someoneordavid@gmail.com
+      responses:
+        "201":
+          description: Solicitud creada exitosamente
+        "400":
+          description: Datos inválidos
+
+  /mfes/requests/{id}:
+    put:
+      tags:
+        - Usuario
+      summary: Actualizar un Mfe mediante una solicitud
+      description: Actualiza los datos de una solicitud enviada previamente.
+      parameters:
+        - name: id
+          in: path
+          required: true
           schema:
-            $ref: "#/components/schemas/MfeRequest"
-    responses:
-      "200":
-        description: Solicitud actualizada
-
-/mfe-relaciones/{id}:
-  get:
-    summary: Consultar relaciones de un MFE
-    description: Devuelve las relaciones de un MFE con otros.
-    parameters:
-      - name: id
-        in: path
+            type: string
+      requestBody:
         required: true
-        schema:
-          type: string
-    security:
-      - cognitoAuth: []
-    responses:
-      "200":
-        description: Relaciones encontradas
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MfeRequest"
+            example:
+              nombre: souldeath
+              dominio: souldeath.com
+              tipo: pagina
+              criticidad: medio
+              estado: aprobado
+              descripcion: souldeath
+              repositorio: https://github.com/empresa/widget-climass
+              versionReact: "16.15.0"
+              versionReactDom: "16.15.0"
+              versionMfe: "0.6.2"
+              equipo: souldeath
+              solicitado_por: someoneordavid@gmail.com
+      responses:
+        "200":
+          description: Solicitud actualizada exitosamente
+        "400":
+          description: Mala solicitud e indicación de errores
+        "404":
+          description: Solicitud no encontrada
 
-/admin/mfes-request:
-  get:
-    summary: Listar solicitudes de MFEs
-    description: Lista todas las solicitudes pendientes o procesadas para revisión.
-    security:
-      - cognitoAuth: []
-    responses:
-      "200":
-        description: Lista de solicitudes
-
-/admin/mfes-request/{id}:
-  get:
-    summary: Obtener detalle de solicitud
-    description: Devuelve el detalle de una solicitud específica de registro de MFE.
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-    security:
-      - cognitoAuth: []
-    responses:
-      "200":
-        description: Detalle de la solicitud
-
-/admin/mfes-request/{id}/approve:
-  put:
-    summary: Aprobar solicitud de MFE
-    description: Marca la solicitud como aprobada.
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-    security:
-      - cognitoAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
+  /mfe-relaciones/{id}:
+    get:
+      tags:
+        - Usuario
+      summary: Consultar relaciones de un MFE
+      description: Devuelve las relaciones de un MFE con otros.
+      parameters:
+        - name: id
+          in: path
+          required: true
           schema:
-            $ref: "#/components/schemas/AdminAction"
-    responses:
-      "200":
-        description: Solicitud aprobada
+            type: string
+      responses:
+        "200":
+          description: Relaciones encontradas
+        "400":
+          description: No se proporciono id del microfrontend
+        "401":
+          description: No autorizado
 
-/admin/mfes-request/{id}/reject:
-  put:
-    summary: Rechazar solicitud de MFE
-    description: Marca la solicitud como rechazada con un mensaje.
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-    security:
-      - cognitoAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/AdminAction"
-    responses:
-      "200":
-        description: Solicitud rechazada
+  #################################
+  # 🔹 RUTAS ADMINISTRADOR
+  #################################
+  /admin/mfes-request:
+    get:
+      tags:
+        - Administrador
+      summary: Listar solicitudes de MFEs
+      description: Lista todas las solicitudes pendientes o procesadas para revisión.
+      responses:
+        "200":
+          description: Lista de solicitudes
+        "401":
+          description: No autorizado
+        "403":
+          description: Acceso prohibido
 
-/admin/mfes-request/{id}/under-review:
-  put:
-    summary: Marcar solicitud como bajo revisión
-    description: Cambia el estado de la solicitud a “bajo supervisión”.
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-    security:
-      - cognitoAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
+  /admin/mfes-request/{id}:
+    get:
+      tags:
+        - Administrador
+      summary: Obtener detalle de solicitud
+      description: Devuelve el detalle de una solicitud específica de registro de MFE.
+      parameters:
+        - name: id
+          in: path
+          required: true
           schema:
-            $ref: "#/components/schemas/AdminAction"
-    responses:
-      "200":
-        description: Solicitud marcada bajo revisión
+            type: string
+      responses:
+        "200":
+          description: Detalle de la solicitud
+        "401":
+          description: No autorizado
+        "403":
+          description: Acceso prohibido
+
+  /admin/mfes-request/{id}/approve:
+    put:
+      tags:
+        - Administrador
+      summary: Aprobar solicitud de MFE
+      description: Marca la solicitud como aprobada.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAction"
+            example:
+              mensaje: "Este es el mensaje enviado"
+      responses:
+        "200":
+          description: Solicitud aprobada correctamente
+        "401":
+          description: No autorizado
+        "403":
+          description: Acceso prohibido
+        "404":
+          description: Solicitud no encontrada
+
+  /admin/mfes-request/{id}/reject:
+    put:
+      tags:
+        - Administrador
+      summary: Rechazar solicitud de MFE
+      description: Marca la solicitud como rechazada con un mensaje.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAction"
+            example:
+              mensaje: "El MFE no cumple los requisitos"
+      responses:
+        "200":
+          description: Solicitud rechazada correctamente
+        "401":
+          description: No autorizado
+        "403":
+          description: Acceso prohibido
+
+  /admin/mfes-request/{id}/under-review:
+    put:
+      tags:
+        - Administrador
+      summary: Marcar solicitud como bajo revisión
+      description: Cambia el estado de la solicitud a “bajo supervisión”.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminAction"
+            example:
+              mensaje: "La solicitud requiere revisión adicional"
+      responses:
+        "200":
+          description: Solicitud rechazada correctamente
+        "401":
+          description: No autorizado
+        "403":
+          description: Acceso prohibido

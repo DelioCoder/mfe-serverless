@@ -30,6 +30,11 @@ export class ApiGatewayCanalConstruct extends Construct {
     this.api = new apigateway.RestApi(this, "ApiCanal", {
       restApiName: "API Canal MFE",
       description: "API expuesta al cliente final para el catálogo de MFEs",
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ["Content-Type", "Authorization"],
+      },
     });
 
     const userPool = cognito.UserPool.fromUserPoolId(this, "ImportedUserPool", props.userPoolId);
@@ -43,6 +48,11 @@ export class ApiGatewayCanalConstruct extends Construct {
     this.api.root.addProxy({
       defaultIntegration: proxyIntegration,
       anyMethod: true,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ["Content-Type", "Authorization"],
+      },
       defaultMethodOptions: {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,

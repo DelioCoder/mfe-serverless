@@ -31,6 +31,12 @@ export class DynamoDbConstruct extends Construct {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
+    this.solicitudesTable.addGlobalSecondaryIndex({
+      indexName: 'SolicitadoPorIndex',
+      partitionKey: { name: 'solicitado_por', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     this.relacionesTable = new dynamodb.Table(this, "RelacionesTable", {
       tableName: "RelacionesTabla",
       partitionKey: { name: "plataforma", type: dynamodb.AttributeType.STRING },

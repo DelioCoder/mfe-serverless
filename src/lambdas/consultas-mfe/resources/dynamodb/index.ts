@@ -62,7 +62,7 @@ export const getAllMfeRequests = async (tableName: string, request_id: string) =
     return resp.Items;
 }
 
-export const getMfeRequestsByUser = async (tableName: string, user_requested: string) => {
+export const getMfeRequestsByUser = async (tableName: string, user_requested: string, nextKey: any) => {
 
     const result = await dynamoDB.send(new QueryCommand({
         TableName: tableName,
@@ -73,10 +73,12 @@ export const getMfeRequestsByUser = async (tableName: string, user_requested: st
         },
         ExpressionAttributeValues: {
             ":sl_p": user_requested
-        }
+        },
+        Limit: 5,
+        ExclusiveStartKey: nextKey
     }));
 
-    return result.Items;
+    return result;
 
 }
 

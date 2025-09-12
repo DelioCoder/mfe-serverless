@@ -28,9 +28,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         }
 
         if (event.resource === "/mfes/requests/by/{user}") {
+          const nextKey = event.queryStringParameters?.nextKey
+            ? JSON.parse(event.queryStringParameters.nextKey)
+            : undefined;
           const userRequested = event.pathParameters!.user;
-          const request = await getMfeRequestsByUser(solicitudesTable, userRequested!);
-          return { statusCode: 200, body: JSON.stringify(request) };
+          const resp = await getMfeRequestsByUser(solicitudesTable, userRequested!, nextKey);
+          return {
+            statusCode: 200,
+            body: JSON.stringify({
+              items: resp.Items,
+              nextKey: resp.LastEvaluatedKey ? JSON.stringify(resp.LastEvaluatedKey) : null
+            })
+          };
         }
 
         if (event.resource === "/mfes/requests/{id}") {

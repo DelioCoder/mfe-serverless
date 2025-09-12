@@ -5,7 +5,7 @@ info:
   version: "1.0.0"
 
 servers:
-  - url: https://api-tecnica.ejemplo.com/prod
+  - url: https://jq8kqm5uvj.execute-api.us-east-1.amazonaws.com/prod
     description: API Técnica
 
 tags:
@@ -188,6 +188,26 @@ paths:
           description: Mala solicitud e indicación de errores
         "404":
           description: Solicitud no encontrada
+    get:
+      tags:
+        - Usuario
+      summary: Obtener detalle de solicitud de MFE
+      description: Devuelve el detalle de una solicitud de registro/actualización de un MFE por su identificador único.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la solicitud
+        "400":
+          description: Parámetro inválido
+        "401":
+          description: No autorizado
+        "404":
+          description: Solicitud no encontrada
 
   /mfe-relaciones/{id}:
     get:
@@ -208,6 +228,30 @@ paths:
           description: No se proporciono id del microfrontend
         "401":
           description: No autorizado
+  
+  /mfes/requests/by/{solicitado_por}:
+    get:
+      tags:
+        - Usuario
+      summary: Listar solicitudes por usuario
+      description: Devuelve todas las solicitudes realizadas por un usuario específico.
+      parameters:
+        - name: solicitado_por
+          in: path
+          required: true
+          schema:
+            type: string
+            format: email
+          description: Correo electrónico del usuario solicitante
+      responses:
+        "200":
+          description: Lista de solicitudes encontradas
+        "400":
+          description: Parámetro inválido
+        "401":
+          description: No autorizado
+        "404":
+          description: No se encontraron solicitudes para el usuario
 
   #################################
   # 🔹 RUTAS ADMINISTRADOR
@@ -331,3 +375,4 @@ paths:
           description: No autorizado
         "403":
           description: Acceso prohibido
+

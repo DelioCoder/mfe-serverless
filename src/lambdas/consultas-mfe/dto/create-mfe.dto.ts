@@ -13,10 +13,11 @@ export class CreateMfeDto {
     public tipo: string;
 
     @IsString()
-    @IsIn(['alta', 'medio', 'baja'])
+    @IsIn(['alta', 'media', 'baja'])
     public criticidad: string;
 
     @IsString()
+    @IsIn(["Activo", "Deprecado", "En desarrollo"])
     public estado: string;
 
     @IsString()

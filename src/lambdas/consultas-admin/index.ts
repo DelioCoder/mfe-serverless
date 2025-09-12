@@ -111,7 +111,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
           await insertIntoAuditTable('Auditorias-Tabla', { admin: adminUsername, usuario_solicitante: solicitado_por, accion: 'aprobación de mfe', motivo: input.mensaje });
 
-          await sendEmail(solicitado_por, input.mensaje, "aceptado");
+          // await sendEmail(solicitado_por, input.mensaje, "aceptado");
 
           return { statusCode: 200, body: JSON.stringify({ message: `Registro de MFe ${mfeId} aprobada` }) };
         }
@@ -121,7 +121,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
           await updateMfeRequestStatus(solicitudTabla, requestId, 'rechazado');
 
-          await sendEmail(solicitado_por, input.mensaje, "rechazado");
+          // await sendEmail(solicitado_por, input.mensaje, "rechazado");
 
           return { statusCode: 200, body: JSON.stringify({ message: "MFE rechazado" }) };
         }
@@ -131,7 +131,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
           await updateMfeRequestStatus(solicitudTabla, requestId, 'bajo observación');
 
-          await sendEmail(solicitado_por, input.mensaje, "observado");
+          // await sendEmail(solicitado_por, input.mensaje, "observado");
 
           return { statusCode: 200, body: JSON.stringify({ message: "MFE observado" }) };
         }

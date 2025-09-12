@@ -1,30 +1,58 @@
 plataforma: "BackOffice Finanzas"
 
 microfrontends:
-  - id: mfe-001
-    nombre: "Estructura"
+  - id: CMFE_001
+    nombre: "MFE_RSA_Gestión de Turnos"
+    tipo: "componente"
+    version: "1.0.0"
+    repositorio: "https://github.com/empresa/mfe-turnos"
+    estado: "activo"
+
+  - id: PMFE_005
+    nombre: "MFE_Seguros_Vida"
     tipo: "pagina"
-    version: "1.0.0"
-    repositorio: "https://github.com/empresa/finanzas-estructura"
+    version: "1.1.0"
+    repositorio: "https://github.com/empresa/mfe-seguros-vida"
+    estado: "en desarrollo"
+
+  - id: WMFE_007
+    nombre: "MFE_Automotriz_Cotizador"
+    tipo: "widget"
+    version: "2.0.0"
+    repositorio: "https://github.com/empresa/mfe-cotizador-vehicular"
     estado: "activo"
 
-  - id: mfe-002
-    nombre: "Remesas"
+  - id: PMFE_004
+    nombre: "MFE_Cliente_Dashboard"
+    tipo: "pagina"
+    version: "2.1.0"
+    repositorio: "https://github.com/empresa/mfe-dashboard-cliente"
+    estado: "activo"
+
+  - id: CMFE_006
+    nombre: "MFE_Agente_Perfil"
     tipo: "componente"
-    version: "1.0.0"
-    repositorio: "https://github.com/empresa/finanzas-remesas"
-    estado: "activo"
+    version: "0.9.0"
+    repositorio: "https://github.com/empresa/mfe-agente-perfil"
+    estado: "deprecado"
 
-  - id: mfe-003
-    nombre: "Reseguro"
+  - id: CAPI_008
+    nombre: "API_Gestión_Usuarios"
     tipo: "componente"
-    version: "1.0.0"
-    repositorio: "https://github.com/empresa/finanzas-reseguro"
+    version: "3.0.0"
+    repositorio: "https://github.com/empresa/api-gestion-usuarios"
     estado: "activo"
 
-  - id: mfe-004
-    nombre: "Pagos"
-    tipo: "componentes"
-    version: "1.0.0"
-    repositorio: "https://github.com/empresa/finanzas-pagos"
+  - id: WSERV002
+    nombre: "Servicio_Autenticación"
+    tipo: "widget"
+    version: "1.2.0"
+    repositorio: "https://github.com/empresa/servicio-autenticacion"
+    estado: "en desarrollo"
+
+  - id: CCOMPO03
+    nombre: "Componente_Selector_Productos"
+    tipo: "componente"
+    version: "1.0.1"
+    repositorio: "https://github.com/empresa/selector-productos"
     estado: "activo"

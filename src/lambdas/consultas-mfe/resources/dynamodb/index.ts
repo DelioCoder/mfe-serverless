@@ -11,7 +11,7 @@ export const getOneMfe = async (tableName: string, term: string) => {
 
     let resp;
 
-    const isMfeId = (term: string) => /^[A-Z]{1,}[0-9]{3,}$/.test(term);
+    const isMfeId = (term: string) => /^[A-Z_]+[0-9]{3,}$/.test(term);
 
     if (isMfeId(term)) {
         resp = await dynamoDB.send(new GetCommand({
@@ -62,7 +62,25 @@ export const getAllMfeRequests = async (tableName: string, request_id: string) =
     return resp.Items;
 }
 
-export const getMfeRequestsById = async (tableName: string, request_id: string) => {
+export const getMfeRequestsByUser = async (tableName: string, user_requested: string) => {
+
+    const result = await dynamoDB.send(new QueryCommand({
+        TableName: tableName,
+        IndexName: "SolicitadoPorIndex",
+        KeyConditionExpression: "#sl_p = :sl_p",
+        ExpressionAttributeNames: {
+            "#sl_p": "solicitado_por"
+        },
+        ExpressionAttributeValues: {
+            ":sl_p": user_requested
+        }
+    }));
+
+    return result.Items;
+
+}
+
+export const getMfeRequestById = async (tableName: string, request_id: string) => {
     const resp = await dynamoDB.send(new GetCommand({
         TableName: tableName,
         Key: { request_id: request_id }

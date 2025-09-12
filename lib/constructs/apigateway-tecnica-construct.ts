@@ -48,12 +48,23 @@ export class ApiGatewayTecnicaConstruct extends Construct {
       authorizationType: apigw.AuthorizationType.COGNITO
     });
 
-    const requestById = requests.addResource("{id}");
-    requestById.addMethod("PUT", new apigw.LambdaIntegration(props.consultasLambda), {
+    const requestsByUser = requests.addResource('by');
+
+    requestsByUser.addResource('{user}').addMethod('GET', new apigw.LambdaIntegration(props.consultasLambda), {
       authorizer,
       authorizationType: apigw.AuthorizationType.COGNITO
     });
 
+    const requestById = requests.addResource("{id}");
+    requestById.addMethod("GET", new apigw.LambdaIntegration(props.consultasLambda), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO
+    });
+    requestById.addMethod("PUT", new apigw.LambdaIntegration(props.consultasLambda), {
+      authorizer,
+      authorizationType: apigw.AuthorizationType.COGNITO
+    });
+    
 
     // /admin/mfes
     const adminRoute = this.api.root.addResource('admin');

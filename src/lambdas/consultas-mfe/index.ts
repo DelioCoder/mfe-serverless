@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { getAllMfes, getOneMfe, insertMfeRequestToBD } from './resources/dynamodb';
+import { getAllMfes, getMfeRequestById, getMfeRequestsByUser, getOneMfe, insertMfeRequestToBD } from './resources/dynamodb';
 import { bodyValidation, CreateMfeDto, UpdateMfeDto } from './dto';
 
 const mfesTable = process.env.MFES_TABLE!;
@@ -27,11 +27,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           return { statusCode: 200, body: JSON.stringify(result) };
         }
 
-        // if (event.resource === "/mfes/requests/{id}") {
-        //   const requestId = event.pathParameters!.id;
-        //   const request = await getMfeRequestsById(solicitudesTable, requestId!);
-        //   return { statusCode: 200, body: JSON.stringify(request) };
-        // }
+        if (event.resource === "/mfes/requests/by/{user}") {
+          const userRequested = event.pathParameters!.user;
+          const request = await getMfeRequestsByUser(solicitudesTable, userRequested!);
+          return { statusCode: 200, body: JSON.stringify(request) };
+        }
+
+        if (event.resource === "/mfes/requests/{id}") {
+          const requestId = event.pathParameters!.id;
+          const request = await getMfeRequestById(solicitudesTable, requestId!);
+          return { statusCode: 200, body: JSON.stringify(request) };
+        }
 
         if (event.resource === "/mfes") {
           const result = await getAllMfes(mfesTable, limit, cursor);

@@ -209,11 +209,25 @@ paths:
         "404":
           description: Solicitud no encontrada
 
-  /mfe-relaciones/{id}:
+  /mfe-relaciones/:
     get:
       tags:
         - Usuario
       summary: Consultar relaciones de un MFE
+      description: Devuelve las relaciones de un MFE con otros.
+      responses:
+        "200":
+          description: Relaciones encontradas
+        "400":
+          description: No se proporciono id del microfrontend
+        "401":
+          description: No autorizado
+
+  /mfe-relaciones/{id}:
+    get:
+      tags:
+        - Usuario
+      summary: Consultar relaciones de un MFE por id
       description: Devuelve las relaciones de un MFE con otros.
       parameters:
         - name: id

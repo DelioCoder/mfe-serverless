@@ -3,7 +3,7 @@ module_cmdb: Rimac (Code)
 categoria: microfrontends
 
 instancias:
-  - codigo: CMFE_001
+  - codigo: MCMFE_001
     nombre: MFE_RSA_Gestión de Turnos
     tipo: componente
     version: 1.0.0
@@ -13,7 +13,7 @@ instancias:
     funcionalidades:
       - gestión de turnos
 
-  - codigo: PMFE_005
+  - codigo: MPMFE_005
     nombre: MFE_Seguros_Vida
     tipo: pagina
     version: 1.1.0
@@ -23,7 +23,7 @@ instancias:
     funcionalidades:
       - cotización de seguros de vida
 
-  - codigo: WMFE_007
+  - codigo: MWMFE_007
     nombre: MFE_Automotriz_Cotizador
     tipo: widget
     version: 2.0.0
@@ -33,7 +33,7 @@ instancias:
     funcionalidades:
       - cálculo de cotización vehicular
 
-  - codigo: PMFE_004
+  - codigo: MPMFE_004
     nombre: MFE_Cliente_Dashboard
     tipo: pagina
     version: 2.1.0
@@ -43,7 +43,7 @@ instancias:
     funcionalidades:
       - panel de cliente
 
-  - codigo: CMFE_006
+  - codigo: MCMFE_006
     nombre: MFE_Agente_Perfil
     tipo: componente
     version: 0.9.0
@@ -53,7 +53,7 @@ instancias:
     funcionalidades:
       - gestión del perfil de agente
 
-  - codigo: CAPI_008
+  - codigo: MCAPI_008
     nombre: API_Gestión_Usuarios
     tipo: componente
     version: 3.0.0
@@ -63,7 +63,7 @@ instancias:
     funcionalidades:
       - administración de usuarios
 
-  - codigo: WSERV002
+  - codigo: MWSERV002
     nombre: Servicio_Autenticación
     tipo: widget
     version: 1.2.0
@@ -74,7 +74,7 @@ instancias:
       - autenticación
       - validación de credenciales
 
-  - codigo: CCOMPO03
+  - codigo: MCCOMPO03
     nombre: Componente_Selector_Productos
     tipo: componente
     version: 1.0.1

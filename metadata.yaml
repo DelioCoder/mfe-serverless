@@ -4,7 +4,7 @@ categoria: microfrontends
 
 instancias:
   - codigo: MCMFE_001
-    nombre: MFE_RSA_Gestión de Turnos
+    nombre: MFE_RSA_Gestión de Turnos test test
     tipo: componente
     version: 1.0.0
     repositorio: https://github.com/empresa/mfe-turnos

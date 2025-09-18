@@ -1,85 +1,24 @@
-app_cmdb: BackOffice Finanzas
+app_cmdb: BackOffice Legal
 module_cmdb: Rimac (Code)
 categoria: microfrontends
 
 instancias:
   - codigo: MCMFE_001
-    nombre: MFE_RSA_Gestión de Turnos test test
+    nombre: MFE_Reportes de Gastos
     tipo: componente
     version: 1.0.0
-    repositorio: https://github.com/empresa/mfe-turnos
-    path: /CMFE_001
+    repositorio: https://github.com/rimac/mfe-reportes-gastos
+    path: /MCMFE_001
     estado: activo
     funcionalidades:
-      - gestión de turnos
+      - gestión de reportes de gastos
 
-  - codigo: MPMFE_005
-    nombre: MFE_Seguros_Vida
+  - codigo: MPMFE_002
+    nombre: MFE_Solicitudes Legales
     tipo: pagina
-    version: 1.1.0
-    repositorio: https://github.com/empresa/mfe-seguros-vida
-    path: /PMFE_005
+    version: 1.0.0
+    repositorio: https://github.com/rimac/mfe-solicitudes-legales
+    path: /MPMFE_002
     estado: en desarrollo
     funcionalidades:
-      - cotización de seguros de vida
-
-  - codigo: MWMFE_007
-    nombre: MFE_Automotriz_Cotizador
-    tipo: widget
-    version: 2.0.0
-    repositorio: https://github.com/empresa/mfe-cotizador-vehicular
-    path: /WMFE_007
-    estado: activo
-    funcionalidades:
-      - cálculo de cotización vehicular
-
-  - codigo: MPMFE_004
-    nombre: MFE_Cliente_Dashboard
-    tipo: pagina
-    version: 2.1.0
-    repositorio: https://github.com/empresa/mfe-dashboard-cliente
-    path: /PMFE_004
-    estado: activo
-    funcionalidades:
-      - panel de cliente
-
-  - codigo: MCMFE_006
-    nombre: MFE_Agente_Perfil
-    tipo: componente
-    version: 0.9.0
-    repositorio: https://github.com/empresa/mfe-agente-perfil
-    path: /CMFE_006
-    estado: deprecado
-    funcionalidades:
-      - gestión del perfil de agente
-
-  - codigo: MCAPI_008
-    nombre: API_Gestión_Usuarios
-    tipo: componente
-    version: 3.0.0
-    repositorio: https://github.com/empresa/api-gestion-usuarios
-    path: /CAPI_008
-    estado: activo
-    funcionalidades:
-      - administración de usuarios
-
-  - codigo: MWSERV002
-    nombre: Servicio_Autenticación
-    tipo: widget
-    version: 1.2.0
-    repositorio: https://github.com/empresa/servicio-autenticacion
-    path: /WSERV002
-    estado: en desarrollo
-    funcionalidades:
-      - autenticación
-      - validación de credenciales
-
-  - codigo: MCCOMPO03
-    nombre: Componente_Selector_Productos
-    tipo: componente
-    version: 1.0.1
-    repositorio: https://github.com/empresa/selector-productos
-    path: /CCOMPO03
-    estado: activo
-    funcionalidades:
-      - selección de productos
+      - gestión de solicitudes legales

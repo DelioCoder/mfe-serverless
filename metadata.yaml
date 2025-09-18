@@ -1,25 +1,19 @@
-app_cmdb: BackOffice Finanzas
+app_cmdb: BackOffice Riesgos
 module_cmdb: Rimac (Code)
 categoria: microfrontends
 
 instancias:
-  - codigo: MONO-001
-    nombre: MFE_Liquidación de Cobranzas
-    tipo: pagina
-    version: 1.0.0
-    repositorio: https://github.com/rimac/monorepo-backoffice-finanzas
-    path: /apps/liquidacion
+  - codigo: MWMFE_003
+    nombre: MFE_Reporte de Siniestros
+    tipo: widget
+    version: 2.0.0
+    repositorio: https://github.com/rimac/mfe-reporte-siniestros
+    path: /MWMFE_003
     estado: activo
     funcionalidades:
-      - visualización de cobranzas
-      - generación de reportes
-
-  - codigo: MONO-002
-    nombre: MFE_Cambio de Asesor
-    tipo: componente
-    version: 1.0.0
-    repositorio: https://github.com/rimac/monorepo-backoffice-finanzas
-    path: /apps/cambio-asesor
-    estado: activo
-    funcionalidades:
-      - reasignación de asesores
+      - reporte en tiempo real de siniestros
+    conexiones:
+      - plataforma: BackOffice Finanzas
+        mfe_id: MONO-001
+      - plataforma: BackOffice Salud
+        mfe_id: HOST-001

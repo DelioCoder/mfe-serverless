@@ -1,19 +1,19 @@
-app_cmdb: Plataforma Rimac
+app_cmdb: BackOffice Riesgos
 module_cmdb: Rimac (Code)
 categoria: microfrontends
 
 instancias:
-  - codigo: HOST-001
-    nombre: Host Principal Rimac
-    tipo: host
-    version: 1.0.0
-    repositorio: https://github.com/rimac/host-platform
-    path: /host
+  - codigo: MWMFE_003
+    nombre: MFE_Reporte de Siniestros
+    tipo: widget
+    version: 2.0.0
+    repositorio: https://github.com/rimac/mfe-reporte-siniestros
+    path: /MWMFE_003
     estado: activo
     funcionalidades:
-      - orquestación de microfrontends
-      - manejo de sesiones
-    authProviders:
-      - Keycloak
-      - Cognito
-      - AzureAD
+      - reporte en tiempo real de siniestros
+    conexiones:
+      - plataforma: BackOffice Finanzas
+        mfe_id: MONO-001
+      - plataforma: BackOffice Salud
+        mfe_id: HOST-001

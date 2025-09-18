@@ -1,24 +1,25 @@
-app_cmdb: BackOffice Legal
+app_cmdb: BackOffice Finanzas
 module_cmdb: Rimac (Code)
 categoria: microfrontends
 
 instancias:
-  - codigo: MCMFE_001
-    nombre: MFE_Reportes de Gastos
-    tipo: componente
-    version: 1.0.0
-    repositorio: https://github.com/rimac/mfe-reportes-gastos
-    path: /MCMFE_001
-    estado: activo
-    funcionalidades:
-      - gestión de reportes de gastos
-
-  - codigo: MPMFE_002
-    nombre: MFE_Solicitudes Legales
+  - codigo: MONO-001
+    nombre: MFE_Liquidación de Cobranzas
     tipo: pagina
     version: 1.0.0
-    repositorio: https://github.com/rimac/mfe-solicitudes-legales
-    path: /MPMFE_002
-    estado: en desarrollo
+    repositorio: https://github.com/rimac/monorepo-backoffice-finanzas
+    path: /apps/liquidacion
+    estado: activo
     funcionalidades:
-      - gestión de solicitudes legales
+      - visualización de cobranzas
+      - generación de reportes
+
+  - codigo: MONO-002
+    nombre: MFE_Cambio de Asesor
+    tipo: componente
+    version: 1.0.0
+    repositorio: https://github.com/rimac/monorepo-backoffice-finanzas
+    path: /apps/cambio-asesor
+    estado: activo
+    funcionalidades:
+      - reasignación de asesores

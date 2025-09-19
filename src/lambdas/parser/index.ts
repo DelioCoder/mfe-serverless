@@ -34,15 +34,26 @@ export const handler: S3Handler = async (event: S3Event) => {
         throw new Error("Metadata inválida");
       }
 
-      for (const mfe of metadataDto.microfrontends) {
+      for (const mfe of metadataDto.instancias) {
         const item: RelacionItem = {
           relacion_id: uuid(),
-          plataforma: metadataDto.plataforma,
-          mfe_id: mfe.id,
+          app_cmdb: metadataDto.app_cmdb,
+          module_cmdb: metadataDto.module_cmdb,
+          categoria: metadataDto.categoria,
+          estructura: metadataDto.estructura,
+          mfe_id: mfe.codigo,
           nombre: mfe.nombre,
           tipo: mfe.tipo,
+          version: mfe.version,
           repositorio: mfe.repositorio,
-          timestamp: Date.now(),
+          path: mfe.path && mfe.path,
+          estado: mfe.estado,
+          funcionalidades: mfe.funcionalidades,
+          // 🔹 Casuística 3: conexiones cruzadas (si vienen en el DTO)
+          ...(mfe.conexiones && { conexiones: mfe.conexiones }),
+          // 🔹 Casuística 4: múltiples auth (si vienen en el DTO)
+          ...(mfe.authProviders && { authProviders: mfe.authProviders }),
+          createdAt: Date.now(),
         };
 
         await insertIntoDynamoDB(RELACIONES_TABLE, item);

@@ -88,7 +88,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
               await updateMfeRequestStatus(solicitudTabla, requestId, 'aprobado');
 
-              await sendEmail(solicitado_por, input.mensaje, "aceptado");
+              // await sendEmail(solicitado_por, input.mensaje, "aceptado");
 
               return { statusCode: 200, body: JSON.stringify({ message: `Actualización de MFe ${informacionMfe.mfe_id} aprobada` }) };
             }
@@ -103,7 +103,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           const seqResult = await updateSecuencialTable(secuenciaIdTabla);
 
           const nextNumber = seqResult.Attributes!.lastNumber;
-          const mfeId = `${prefijo}${String(nextNumber).padStart(3, "0")}`;
+          const mfeId = `M${prefijo}${String(nextNumber).padStart(3, "0")}`;
 
           await updateMfeRequestStatus(solicitudTabla, requestId, 'aprobado');
           

@@ -38,8 +38,8 @@ export class DynamoDbConstruct extends Construct {
     });
 
     this.relacionesTable = new dynamodb.Table(this, "RelacionesTable", {
-      tableName: "RelacionesTabla",
-      partitionKey: { name: "plataforma", type: dynamodb.AttributeType.STRING },
+      tableName: "Relacion-Tabla",
+      partitionKey: { name: "app_cmdb", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "mfe_id", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // dev

@@ -1,9 +1,16 @@
 export interface RelacionItem{
     relacion_id: string;
-    plataforma: string;
+    app_cmdb: string;
+    module_cmdb: string;
+    categoria: string;
+    estructura: string;
     mfe_id: string;
     nombre: string;
     tipo: string;
+    version: string;
     repositorio: string;
-    timestamp: number;
+    path?: string;
+    estado: string;
+    funcionalidades: string[];
+    createdAt: number;
 }

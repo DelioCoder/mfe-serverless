@@ -30,13 +30,7 @@ components:
         - dominio
         - tipo
         - criticidad
-        - estado
         - descripcion
-        - repositorio
-        - versionReact
-        - versionReactDom
-        - versionMfe
-        - equipo
         - solicitado_por
       properties:
         nombre:
@@ -49,25 +43,15 @@ components:
         criticidad:
           type: string
           enum: [alta, medio, baja]
-        estado:
-          type: string
-          enum: [pendiente, aprobado, rechazado, bajo supervisión]
         descripcion:
-          type: string
-        repositorio:
-          type: string
-          format: uri
-        versionReact:
-          type: string
-        versionReactDom:
-          type: string
-        versionMfe:
-          type: string
-        equipo:
           type: string
         solicitado_por:
           type: string
           format: email
+        arquitecto_solucion:
+          type: string
+        desarrolladores:
+          type: string
 
     AdminAction:
       type: object
@@ -117,7 +101,6 @@ paths:
           description: Ruta no encontrada
         "401":
           description: No autorizado
-        
 
   /mfes/requests:
     post:
@@ -132,18 +115,15 @@ paths:
             schema:
               $ref: "#/components/schemas/MfeRequest"
             example:
-              nombre: test
-              dominio: test.com
-              tipo: pagina
-              criticidad: medio
-              estado: pendiente
-              descripcion: test
-              repositorio: https://github.com/empresa/widget-clima
-              versionReact: "16.14.0"
-              versionReactDom: "16.14.0"
-              versionMfe: "0.5.2"
-              equipo: Test
-              solicitado_por: someoneordavid@gmail.com
+              nombre: "Componente_Selector_Productos"
+              criticidad: "baja"
+              descripcion: "Componente que permite la selección de productos en el flujo de compra."
+              dominio: "productos"
+              tipo: "componente"
+              estado: "deprecado"
+              arquitecto_solucion: "Sandra López"
+              desarrolladores: "Óscar Medina, Pamela Flores"
+              solicitado_por: "slopez@rimac.com"
       responses:
         "201":
           description: Solicitud creada exitosamente
@@ -169,18 +149,15 @@ paths:
             schema:
               $ref: "#/components/schemas/MfeRequest"
             example:
-              nombre: souldeath
-              dominio: souldeath.com
-              tipo: pagina
-              criticidad: medio
-              estado: aprobado
-              descripcion: souldeath
-              repositorio: https://github.com/empresa/widget-climass
-              versionReact: "16.15.0"
-              versionReactDom: "16.15.0"
-              versionMfe: "0.6.2"
-              equipo: souldeath
-              solicitado_por: someoneordavid@gmail.com
+              nombre: "Componente_Selector_Productos"
+              criticidad: "baja"
+              descripcion: "Componente que permite la selección de productos en el flujo de compra."
+              dominio: "productos"
+              tipo: "componente"
+              estado: "deprecado"
+              arquitecto_solucion: "Sandra López"
+              desarrolladores: "test, Óscar Medina, Pamela Flores"
+              solicitado_por: "slopez@rimac.com"
       responses:
         "200":
           description: Solicitud actualizada exitosamente
@@ -384,9 +361,8 @@ paths:
               mensaje: "La solicitud requiere revisión adicional"
       responses:
         "200":
-          description: Solicitud rechazada correctamente
+          description: Solicitud marcada como bajo supervisión
         "401":
           description: No autorizado
         "403":
           description: Acceso prohibido
-

@@ -1,31 +1,29 @@
-app_cmdb: BackOffice Riesgos
+app_cmdb: Plataforma Rimac
 module_cmdb: Rimac (Code)
 categoria: microfrontends
-estructura: multirepo-conexiones
+estructura: host-multi-auth
 
 instancias:
-  - codigo: MWMFE_007
-    nombre: MFE_Automotriz_Cotizador
-    tipo: widget
-    version: 2.0.0
-    repositorio: https://github.com/empresa/mfe-cotizador-vehicular
-    estado: activo
+  - codigo: MCMFE_006
+    nombre: MFE_Agente_Perfil
+    tipo: host
+    version: 0.9.0
+    repositorio: https://github.com/empresa/host-agente
+    estado: deprecado
     funcionalidades:
-      - cálculo de cotización vehicular
-    conexiones:
-      - plataforma: BackOffice Finanzas
-        mfe_id: MWSERV002
-      - plataforma: BackOffice Legal
-        mfe_id: MCMFE_001
+      - gestión del perfil de agente
+    authProviders:
+      - Keycloak
+      - Cognito
 
-  - codigo: MCAPI_008
-    nombre: API_Gestión_Usuarios
-    tipo: componente
-    version: 3.0.0
-    repositorio: https://github.com/empresa/api-gestion-usuarios
+  - codigo: MPMFE_005
+    nombre: MFE_Seguros_Vida
+    tipo: host
+    version: 1.1.0
+    repositorio: https://github.com/empresa/host-seguros-vida
     estado: activo
     funcionalidades:
-      - administración de usuarios
-    conexiones:
-      - plataforma: BackOffice Finanzas
-        mfe_id: MCCOMPO03
+      - cotización de seguros de vida
+    authProviders:
+      - AzureAD
+      - Cognito

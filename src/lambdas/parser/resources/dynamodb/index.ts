@@ -3,13 +3,18 @@ import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { RelacionItem } from '../../interfaces/relacion';
 
 const dynamoClient = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(dynamoClient);
+const docClient = DynamoDBDocumentClient.from(dynamoClient, {
+    marshallOptions: {
+        convertClassInstanceToMap: true,
+        removeUndefinedValues: true
+    }
+});
 
-export const insertIntoDynamoDB = async(tabla: string, item: RelacionItem) => {
+export const insertIntoDynamoDB = async (tabla: string, item: RelacionItem) => {
     await docClient.send(
         new PutCommand({
             TableName: tabla,
             Item: item,
         })
     );
-}
+};

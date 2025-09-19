@@ -15,6 +15,7 @@ export class MfeMapper {
             funcionalidades: relationMfe.funcionalidades || '',
             dominio: entity.dominio,
             tipo: entity.tipo,
+            estado: entity.estado,
             arquitectoSolucion: entity.arquitecto_solucion,
             solicitadoPor: entity.solicitado_por,
             desarrolladores: entity.desarrolladores,

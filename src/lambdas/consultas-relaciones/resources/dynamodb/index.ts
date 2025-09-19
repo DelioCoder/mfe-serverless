@@ -1,37 +1,39 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { RelationMfeEntity } from "../../interfaces/Relations-entity";
 
 const client = new DynamoDBClient({});
 const dynamoDB = DynamoDBDocumentClient.from(client);
 
-export const getRelationByPlatform = async(tableName: string, platformName: string) => {
+export async function getMfesGroupedByPlataforma(tableName: string) {
+  const result = await dynamoDB.send(new ScanCommand({ TableName: tableName }));
 
-    const result = await dynamoDB.send(new QueryCommand({
-        TableName: tableName,
-        KeyConditionExpression: "#pl = :pl_value",
-        ExpressionAttributeNames: {
-            "#pl": "plataforma"
-        },
-        ExpressionAttributeValues: {
-            ":pl_value": platformName
-        }
-    }));
+  const items = result.Items as RelationMfeEntity[] || [];
 
-    const data = result.Items;
-
-    const mfesArray = data?.map((item) => {
-        return {
-            mfe_id: item.mfe_id,
-            mfe_nombre: item.nombre,
-            mfe_repositorio: item.repositorio,
-            mfe_tipo: item.tipo
-        }
+  const grouped: Record<string, any[]> = {};
+  for (const item of items) {
+    if (!grouped[item.app_cmdb]) {
+      grouped[item.app_cmdb] = [];
+    }
+    grouped[item.app_cmdb].push({
+      relacionId: item.relacion_id,
+      mfeId: item.mfe_id,
+      nombre: item.nombre,
+      tipo: item.tipo,
+      version: item.version,
+      repositorio: item.repositorio,
+      path: item.path,
+      estado: item.estado,
+      funcionalidades: item.funcionalidades,
+      authProviders: item.authProviders,
+      timestamp: item.timestamp
     });
+  }
 
-    return {
-        plataforma: platformName,
-        mfes: mfesArray,
-    };
+  return Object.entries(grouped).map(([appCmdb, mfes]) => ({
+    appCmdb,
+    mfes
+  }));
 }
 
 export async function getRelacionesByMfeId(tableName: string, mfeId: string) {

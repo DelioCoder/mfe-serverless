@@ -1,7 +1,7 @@
 app_cmdb: BackOffice Legal
 module_cmdb: Rimac (Code)
 categoria: microfrontends
-estructura: multirepo-clasico
+estructura: multirepo
 
 instancias:
   - codigo: MCMFE_001

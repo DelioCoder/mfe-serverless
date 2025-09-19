@@ -1,26 +1,31 @@
-app_cmdb: BackOffice Finanzas
+app_cmdb: BackOffice Riesgos
 module_cmdb: Rimac (Code)
 categoria: microfrontends
-estructura: monorepo
+estructura: multirepo-conexiones
 
 instancias:
-  - codigo: MWSERV002
-    nombre: Servicio_Autenticación
+  - codigo: MWMFE_007
+    nombre: MFE_Automotriz_Cotizador
     tipo: widget
-    version: 1.2.0
-    repositorio: https://github.com/empresa/monorepo-finanzas
-    path: /apps/servicio-auth
-    estado: en desarrollo
-    funcionalidades:
-      - autenticación
-      - validación de credenciales
-
-  - codigo: MCCOMPO03
-    nombre: Componente_Selector_Productos
-    tipo: componente
-    version: 1.0.1
-    repositorio: https://github.com/empresa/monorepo-finanzas
-    path: /apps/selector-productos
+    version: 2.0.0
+    repositorio: https://github.com/empresa/mfe-cotizador-vehicular
     estado: activo
     funcionalidades:
-      - selección de productos
+      - cálculo de cotización vehicular
+    conexiones:
+      - plataforma: BackOffice Finanzas
+        mfe_id: MWSERV002
+      - plataforma: BackOffice Legal
+        mfe_id: MCMFE_001
+
+  - codigo: MCAPI_008
+    nombre: API_Gestión_Usuarios
+    tipo: componente
+    version: 3.0.0
+    repositorio: https://github.com/empresa/api-gestion-usuarios
+    estado: activo
+    funcionalidades:
+      - administración de usuarios
+    conexiones:
+      - plataforma: BackOffice Finanzas
+        mfe_id: MCCOMPO03

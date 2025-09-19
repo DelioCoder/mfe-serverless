@@ -1,14 +1,14 @@
 app_cmdb: BackOffice Legal
 module_cmdb: Rimac (Code)
 categoria: microfrontends
-estructura: multirepo
+estructura: multirepo-clasico
 
 instancias:
   - codigo: MCMFE_001
-    nombre: MFE_Reportes de Gastos
+    nombre: MFE_RSA_Gestión de Turnos
     tipo: componente
     version: 1.0.0
-    repositorio: https://github.com/rimac/mfe-reportes-gastos
+    repositorio: https://github.com/empresa/mfe-turnos
     estado: activo
     funcionalidades:
-      - gestión de reportes de gastos
+      - gestión de turnos

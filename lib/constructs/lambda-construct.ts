@@ -30,6 +30,7 @@ export class LambdaConstruct extends Construct {
       environment: {
         MFES_TABLE: props.mfesTable.tableName,
         SOLICITUDES_TABLE: props.solicitudesTable.tableName,
+        RELACIONES_TABLE: props.relacionesTable.tableName
       },
       bundling: {
         forceDockerBundling: false,
@@ -98,6 +99,7 @@ export class LambdaConstruct extends Construct {
     props.solicitudesTable.grantReadWriteData(this.consultasLambda);
     props.solicitudesTable.grantReadWriteData(this.consultasAdminLambda);
     props.relacionesTable.grantReadWriteData(this.parseoLambda);
+    props.relacionesTable.grantReadWriteData(this.consultasLambda);
     props.relacionesTable.grantReadData(this.relacionesLambda);
     props.auditoriaTable.grantWriteData(this.consultasAdminLambda);
   }

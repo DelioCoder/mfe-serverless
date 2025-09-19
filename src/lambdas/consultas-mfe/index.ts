@@ -50,15 +50,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
         if (event.resource === "/mfes") {
           const result = await getAllMfes(mfesTable, limit, cursor);
-          const nextCursor = result.LastEvaluatedKey
-            ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey))
+          const nextCursor = result.nextKey
+            ? encodeURIComponent(JSON.stringify(result.nextKey))
             : null;
 
           return {
             statusCode: 200,
             body: JSON.stringify({
-              data: result.Items,
-              next: result.Items!.length < limit ? null : nextCursor,
+              data: result.mfeArray,
+              next: result.mfeArray!.length < limit ? null : nextCursor,
               meta: {
                 hasMore: !!nextCursor
               }

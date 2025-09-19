@@ -1,33 +1,74 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import { MfeEntity, MfeRelationEntity } from '../../interfaces';
+import { MfeMapper } from '../../mappers/mfe-mapper';
 
 const client = new DynamoDBClient({});
 const dynamoDB = DynamoDBDocumentClient.from(client);
 
+const relationTable = process.env.RELACIONES_TABLE!;
+
 type TypeRequest = "registro" | "actualización";
+
+export const getMfeDetailInRelations = async (mfe_id: string) => {
+
+    const resp = await dynamoDB.send(new QueryCommand({
+        TableName: relationTable,
+        IndexName: "MfeIndexId",
+        KeyConditionExpression: "#id = :id",
+        ExpressionAttributeNames: { "#id": "mfe_id" },
+        ExpressionAttributeValues: { ":id": mfe_id }
+    }));
+
+    return resp.Items![0] as MfeRelationEntity;
+
+}
 
 export const getOneMfe = async (tableName: string, term: string) => {
 
-    let resp;
+    let result: any;
+    let mfe: MfeEntity;
+    let relationMfe: MfeRelationEntity;
 
     const isMfeId = (term: string) => /^[A-Z_]+[0-9]{3,}$/.test(term);
 
     if (isMfeId(term)) {
-        resp = await dynamoDB.send(new GetCommand({
+        result = await dynamoDB.send(new GetCommand({
             TableName: tableName,
             Key: { mfe_id: term }
         }));
 
-        return resp.Item || null;
+        mfe = result.Item as MfeEntity;
+
+        if (!mfe) {
+            return `No existe microfrontend con id [${term}]`
+        }
+
+        relationMfe = await getMfeDetailInRelations(mfe.mfe_id);
+
+        return MfeMapper.fromEntityToResponse(mfe, relationMfe ? relationMfe : {} as MfeRelationEntity);
+
     } else {
-        const resp = await dynamoDB.send(new ScanCommand({
+        result = await dynamoDB.send(new ScanCommand({
             TableName: tableName,
             FilterExpression: "nombre = :n",
             ExpressionAttributeValues: { ":n": term },
         }));
 
-        return resp.Items && resp.Items.length > 0 ? resp.Items[0] : null;
+        if (result.Items && result.Items.length > 0) {
+            mfe = result.Items[0];
+
+            if (!mfe) {
+                return `No existe microfrontend con nombre: ${term}`
+            }
+
+            relationMfe = await getMfeDetailInRelations(mfe.mfe_id);
+
+            return MfeMapper.fromEntityToResponse(mfe, relationMfe);
+        } else {
+            return null;
+        }
 
     }
 }
@@ -48,7 +89,15 @@ export const getAllMfes = async (tableName: string, limit: number, cursor?: stri
 
     const data = await dynamoDB.send(new QueryCommand(params));
 
-    return data;
+    const mfeArray = data.Items as MfeEntity[];
+    const nextKey = data.LastEvaluatedKey;
+
+    return {
+        mfeArray: mfeArray.map((item) => {
+            return MfeMapper.fromEntityToMfEResponse(item);
+        }),
+        nextKey
+    };
 
 }
 
